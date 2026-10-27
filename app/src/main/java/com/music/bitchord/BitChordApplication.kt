@@ -183,7 +183,7 @@ class BitChordApplication : Application(), SingletonImageLoader.Factory {
                     chain.request().newBuilder()
                         .header(
                             "User-Agent",
-                            "Mumixic/${BuildConfig.VERSION_NAME} (Android; +https://github.com/kushagrasinghx/Mumixic)",
+                            "Mumixic/${BuildConfig.VERSION_NAME} (Android; +https://github.com/rishirishith18/Mumixic-Windows)",
                         )
                         .build(),
                 )

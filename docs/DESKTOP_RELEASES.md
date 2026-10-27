@@ -68,12 +68,9 @@ look for macOS files yet, so Mac users get the release page.
 `desktopApp/src/main/kotlin/com/music/bitchord/desktop/DesktopUpdateChecker.kt`, shown as a dialog
 from `BitChordDesktopApp` in `DesktopApp.kt`:
 
-1. At launch it calls `GET https://api.github.com/repos/kushagrasinghx/BitChord/releases/latest`.
-2. It strips the `v` from `tag_name` and compares it with `bitchord.version` (numeric, dot by dot;
-   a `-beta` current version is older than the same release).
-3. If newer, it picks the asset for the running OS and shows "Update available" with Download and
-   Later. Download opens the asset URL in the browser. If no asset matches it opens the release
-   page instead. Nothing is installed automatically.
+1. At launch it calls `GET https://api.github.com/repos/rishirishith18/Mumixic-Windows/releases/latest`.
+2. It strips the `v` from `tag_name` and compares it with `mumixic.version` / `bitchord.version`.
+3. If newer, it picks the asset for the running OS and shows "Update available" with "Update Now", "Browser", and "Later". "Update Now" downloads the installer directly inside the app with a progress bar and automatically launches it to install over-the-air (OTA).
 4. Network and parse errors are swallowed. No internet means no dialog.
 
 What this means for releasing:

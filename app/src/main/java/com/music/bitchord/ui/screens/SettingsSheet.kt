@@ -1620,11 +1620,11 @@ fun SettingsScreen(
                         textDecoration = TextDecoration.Underline,
                     ),
                 )
-                withLink(LinkAnnotation.Url("https://github.com/kushagrasinghx/Mumixic", linkStyles)) {
+                withLink(LinkAnnotation.Url("https://github.com/rishirishith18/Mumixic-Windows", linkStyles)) {
                     append("GitHub")
                 }
                 append("  ")
-                withLink(LinkAnnotation.Url("https://github.com/kushagrasinghx", linkStyles)) {
+                withLink(LinkAnnotation.Url("https://github.com/rishirishith18", linkStyles)) {
                     append("Developer")
                 }
                 append("  ")

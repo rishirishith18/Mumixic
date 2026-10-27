@@ -7,20 +7,24 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.isSuccess
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import java.io.File
+import java.io.FileOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
+import kotlin.system.exitProcess
 
 /**
  * Looks at the repo's "latest release" on GitHub once per launch and says whether it is newer
- * than the running build. The installer is not run from here: the dialog opens the asset in the
- * browser, so the user installs it the way they installed the first one.
- *
- * GitHub's "latest" skips pre-releases and drafts, so a `-beta` desktop build is only ever
- * nudged toward a published release.
+ * than the running build. It can download the platform-specific installer over-the-air (OTA)
+ * and launch it to automatically update the application.
  */
 internal object DesktopUpdateChecker {
 
@@ -29,13 +33,17 @@ internal object DesktopUpdateChecker {
         val releaseUrl: String,
         /** The installer for this platform, or null when the release has none. */
         val downloadUrl: String?,
+        val fileName: String?,
         val notes: String?,
     )
 
     private const val LATEST_RELEASE_URL =
-        "https://api.github.com/repos/kushagrasinghx/BitChord/releases/latest"
+        "https://api.github.com/repos/rishirishith18/Mumixic-Windows/releases/latest"
 
-    val currentVersion: String = System.getProperty("bitchord.version") ?: "1.8-beta1"
+    val currentVersion: String =
+        System.getProperty("mumixic.version")
+            ?: System.getProperty("bitchord.version")
+            ?: "1.8-beta1"
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -57,23 +65,27 @@ internal object DesktopUpdateChecker {
         val url = release["html_url"]?.jsonPrimitive?.contentOrNull ?: return@runCatching null
         val latest = tag.removePrefix("v")
         if (!isNewer(latest, currentVersion)) return@runCatching null
+        val installerAsset = findInstallerAsset(release)
         UpdateInfo(
             version = latest,
             releaseUrl = url,
-            downloadUrl = installerUrl(release),
+            downloadUrl = installerAsset?.first,
+            fileName = installerAsset?.second,
             notes = release["body"]?.jsonPrimitive?.contentOrNull,
         )
     }.getOrNull()
 
     /**
-     * The release names its files `BitChord-<version>-windows-x64-setup.exe` and
-     * `BitChord-<version>-linux-x86_64.AppImage` (see .github/workflows/release.yml); match on the
-     * platform part so a version change does not matter.
+     * Matches platform installer packages from the release assets:
+     * - Windows: .exe, -setup.exe, .msi
+     * - Linux: .AppImage, .deb
+     * - macOS: .dmg, .pkg
      */
-    private fun installerUrl(release: JsonObject): String? {
+    private fun findInstallerAsset(release: JsonObject): Pair<String, String>? {
         val suffixes = when {
-            DesktopPlatform.isWindows -> listOf("-windows-x64-setup.exe")
+            DesktopPlatform.isWindows -> listOf("-windows-x64-setup.exe", ".exe", ".msi")
             DesktopPlatform.isLinux -> listOf(".AppImage", "-linux-amd64.deb")
+            DesktopPlatform.isMac -> listOf(".dmg", ".pkg")
             else -> return null
         }
         val assets = release["assets"]?.jsonArray?.mapNotNull { it as? JsonObject }.orEmpty()
@@ -82,9 +94,103 @@ internal object DesktopUpdateChecker {
                 asset["name"]?.jsonPrimitive?.contentOrNull?.endsWith(suffix, ignoreCase = true) == true &&
                     asset["state"]?.jsonPrimitive?.contentOrNull == "uploaded"
             }
-            hit?.get("browser_download_url")?.jsonPrimitive?.contentOrNull?.let { return it }
+            if (hit != null) {
+                val url = hit["browser_download_url"]?.jsonPrimitive?.contentOrNull
+                val name = hit["name"]?.jsonPrimitive?.contentOrNull
+                if (url != null && name != null) {
+                    return url to name
+                }
+            }
         }
         return null
+    }
+
+    /**
+     * Streams the installer file directly with progress callback.
+     */
+    suspend fun downloadInstaller(
+        url: String,
+        fileName: String,
+        onProgress: (Float) -> Unit,
+    ): File = withContext(Dispatchers.IO) {
+        val targetDir = File(System.getProperty("java.io.tmpdir"), "MumixicUpdates").apply { mkdirs() }
+        val targetFile = File(targetDir, fileName)
+
+        var currentUrl = url
+        var connection: HttpURLConnection
+        var redirects = 0
+        while (true) {
+            val u = java.net.URI.create(currentUrl).toURL()
+            connection = u.openConnection() as HttpURLConnection
+            connection.instanceFollowRedirects = true
+            connection.connectTimeout = 15_000
+            connection.readTimeout = 30_000
+            connection.setRequestProperty("User-Agent", "Mumixic-Desktop")
+            val status = connection.responseCode
+            if (status in 300..399) {
+                val newUrl = connection.getHeaderField("Location") ?: break
+                currentUrl = newUrl
+                redirects++
+                if (redirects > 8) error("Too many redirects: $redirects")
+                continue
+            }
+            break
+        }
+
+        val contentLength = connection.contentLengthLong
+        var downloadedBytes = 0L
+
+        connection.inputStream.use { input ->
+            FileOutputStream(targetFile).use { output ->
+                val buffer = ByteArray(32 * 1024)
+                var read: Int
+                while (input.read(buffer).also { read = it } != -1) {
+                    output.write(buffer, 0, read)
+                    downloadedBytes += read
+                    if (contentLength > 0) {
+                        onProgress((downloadedBytes.toFloat() / contentLength).coerceIn(0f, 1f))
+                    } else {
+                        onProgress(-1f)
+                    }
+                }
+            }
+        }
+        targetFile
+    }
+
+    /**
+     * Launches the installer process and terminates the current instance so files can be updated cleanly.
+     */
+    fun launchInstaller(file: File) {
+        try {
+            when {
+                DesktopPlatform.isWindows -> {
+                    if (file.name.endsWith(".msi", ignoreCase = true)) {
+                        ProcessBuilder("msiexec", "/i", file.absolutePath).start()
+                    } else {
+                        ProcessBuilder(file.absolutePath).start()
+                    }
+                }
+                DesktopPlatform.isMac -> {
+                    ProcessBuilder("open", file.absolutePath).start()
+                }
+                DesktopPlatform.isLinux -> {
+                    file.setExecutable(true, false)
+                    if (file.name.endsWith(".AppImage", ignoreCase = true)) {
+                        ProcessBuilder(file.absolutePath).start()
+                    } else if (file.name.endsWith(".deb", ignoreCase = true)) {
+                        ProcessBuilder("xdg-open", file.absolutePath).start()
+                    } else {
+                        ProcessBuilder("xdg-open", file.parentFile.absolutePath).start()
+                    }
+                }
+                else -> {
+                    DesktopExternalLinks.open(file.toURI().toString())
+                }
+            }
+        } finally {
+            exitProcess(0)
+        }
     }
 
     private class Parsed(val parts: List<Int>, val preRelease: Boolean)

@@ -1,4 +1,4 @@
-# BitChord TV
+# Mumixic TV
 
 Android TV / Google TV build of BitChord: a remote-first Compose-for-TV interface
 (home, library, search, settings, a full-screen now-playing view with synced

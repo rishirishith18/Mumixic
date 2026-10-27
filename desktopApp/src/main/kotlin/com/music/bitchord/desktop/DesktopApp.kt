@@ -171,6 +171,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -520,26 +521,100 @@ fun BitChordDesktopApp() {
     var personalPlayingStash by remember { mutableStateOf(false) }
     val persistence = remember { DesktopPersistence() }
     var availableUpdate by remember { mutableStateOf<DesktopUpdateChecker.UpdateInfo?>(null) }
+    var updateDownloading by remember { mutableStateOf(false) }
+    var updateProgress by remember { mutableStateOf(0f) }
+    var updateError by remember { mutableStateOf<String?>(null) }
+
     LaunchedEffect(Unit) { availableUpdate = DesktopUpdateChecker.check() }
     availableUpdate?.let { update ->
         AlertDialog(
-            onDismissRequest = { availableUpdate = null },
+            onDismissRequest = {
+                if (!updateDownloading) availableUpdate = null
+            },
             title = { Text(DesktopStrings["d_update_available", "Update available"]) },
             text = {
-                Text(
-                    "BitChord ${update.version} is out — you have ${DesktopUpdateChecker.currentVersion}." +
-                        (update.notes?.takeIf { it.isNotBlank() }?.let { "\n\n${it.take(600)}" } ?: ""),
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        "Mumixic ${update.version} is out — you have ${DesktopUpdateChecker.currentVersion}." +
+                            (update.notes?.takeIf { it.isNotBlank() }?.let { "\n\n${it.take(500)}" } ?: ""),
+                    )
+                    if (updateDownloading) {
+                        if (updateProgress >= 0f) {
+                            LinearProgressIndicator(
+                                progress = { updateProgress },
+                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                                color = DesktopAccent,
+                            )
+                            Text(
+                                "Downloading update… ${(updateProgress * 100).toInt()}%",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = DesktopSecondary,
+                            )
+                        } else {
+                            LinearProgressIndicator(
+                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                                color = DesktopAccent,
+                            )
+                            Text(
+                                "Downloading update…",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = DesktopSecondary,
+                            )
+                        }
+                    }
+                    updateError?.let { err ->
+                        Text(
+                            "Update failed: $err",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                }
             },
             confirmButton = {
-                TextButton(onClick = {
-                    DesktopExternalLinks.open(update.downloadUrl ?: update.releaseUrl)
-                    availableUpdate = null
-                }) { Text(DesktopStrings["d_download", "Download"]) }
+                if (updateDownloading) {
+                    TextButton(onClick = {}, enabled = false) {
+                        Text("Installing…")
+                    }
+                } else if (!update.downloadUrl.isNullOrBlank() && !update.fileName.isNullOrBlank()) {
+                    TextButton(onClick = {
+                        updateDownloading = true
+                        updateError = null
+                        updateProgress = 0f
+                        scope.launch {
+                            try {
+                                val file = DesktopUpdateChecker.downloadInstaller(
+                                    update.downloadUrl,
+                                    update.fileName,
+                                ) { progress ->
+                                    updateProgress = progress
+                                }
+                                DesktopUpdateChecker.launchInstaller(file)
+                            } catch (e: Exception) {
+                                updateError = e.message ?: "Failed to download update"
+                                updateDownloading = false
+                            }
+                        }
+                    }) { Text(DesktopStrings["d_update_now", "Update Now"]) }
+                } else {
+                    TextButton(onClick = {
+                        DesktopExternalLinks.open(update.downloadUrl ?: update.releaseUrl)
+                        availableUpdate = null
+                    }) { Text(DesktopStrings["d_download", "Download"]) }
+                }
             },
             dismissButton = {
-                TextButton(onClick = { availableUpdate = null }) {
-                    Text(DesktopStrings["d_later", "Later"])
+                if (!updateDownloading) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        TextButton(onClick = {
+                            DesktopExternalLinks.open(update.releaseUrl)
+                        }) {
+                            Text("Browser")
+                        }
+                        TextButton(onClick = { availableUpdate = null }) {
+                            Text(DesktopStrings["d_later", "Later"])
+                        }
+                    }
                 }
             },
         )
@@ -6427,7 +6502,7 @@ private fun DesktopSettingsScreen(
                         DesktopStrings["d_tray_icon", "Tray icon"],
                         DesktopStrings[
                             "d_show_bitchord_in_the_system_tray_with_playback_controls",
-                            "Show BitChord in the system tray, with playback controls",
+                            "Show Mumixic in the system tray, with playback controls",
                         ],
                         trayIconEnabled,
                         onTrayIconChange,
@@ -6437,7 +6512,7 @@ private fun DesktopSettingsScreen(
                             DesktopStrings["d_keep_playing_when_closed", "Keep playing when closed"],
                             DesktopStrings[
                                 "d_closing_the_window_leaves_bitchord_in_the_tray_instead_o",
-                                "Closing the window leaves BitChord in the tray instead of quitting",
+                                "Closing the window leaves Mumixic in the tray instead of quitting",
                             ],
                             closeToTray,
                             onCloseToTrayChange,
@@ -6639,18 +6714,22 @@ private fun DesktopSettingsScreen(
 /** The line at the foot of the settings sheet, as Android has it. */
 @Composable
 private fun DesktopSettingsFooter(onLicenses: () -> Unit) {
-    val version = remember { System.getProperty("bitchord.version") ?: "1.8-beta1" }
+    val version = remember {
+        System.getProperty("mumixic.version")
+            ?: System.getProperty("bitchord.version")
+            ?: "1.8.0"
+    }
     val linkStyles = TextLinkStyles(
         style = SpanStyle(color = DesktopAccent, textDecoration = TextDecoration.Underline),
     )
     Text(
         text = buildAnnotatedString {
-            append("bitchord $version  ")
-            withLink(LinkAnnotation.Url("https://github.com/kushagrasinghx/BitChord", linkStyles)) {
+            append("mumixic $version  ")
+            withLink(LinkAnnotation.Url("https://github.com/rishirishith18/Mumixic-Windows", linkStyles)) {
                 append("GitHub")
             }
             append("  ")
-            withLink(LinkAnnotation.Url("https://github.com/kushagrasinghx", linkStyles)) {
+            withLink(LinkAnnotation.Url("https://github.com/rishirishith18", linkStyles)) {
                 append("Developer")
             }
             append("  ")
@@ -6681,7 +6760,7 @@ private fun DesktopLicensesPage(onDismiss: () -> Unit) {
             modifier = Modifier.padding(top = 20.dp, bottom = 4.dp),
         )
         Text(
-            DesktopStrings["d_bitchord_is_free_software_and_so_is_everything_it_is_bui", "BitChord is free software, and so is everything it is built on."],
+            DesktopStrings["d_bitchord_is_free_software_and_so_is_everything_it_is_bui", "Mumixic is free software, and so is everything it is built on."],
             color = DesktopSecondary,
             style = MaterialTheme.typography.bodySmall,
         )

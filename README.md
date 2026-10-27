@@ -83,8 +83,6 @@
 
 <h1><a id="download"></a>Download</h1>
 
-<a href="https://github.com/kushagrasinghx/BitChord/releases" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/supported/android/cozy.svg" alt="Download for Android" height="55"/></a>
-<a href="https://github.com/kushagrasinghx/BitChord/releases" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/supported/windows/cozy.svg" alt="Download for Windows" height="55"/></a>
 
 Grab the latest signed APK from the [Releases](https://github.com/kushagrasinghx/BitChord/releases) page. Sideloading requires enabling "Install unknown apps" for whichever app you download it with.
 
@@ -104,8 +102,6 @@ We welcome contributions to Mumixic! Please review our [Contributing Guide](CONT
 
 ### Thanks to all contributors ❤
 
-<a href="https://github.com/kushagrasinghx/BitChord/graphs/contributors">
-  <img src="https://raw.githubusercontent.com/kushagrasinghx/BitChord/contributors/contributors.svg" />
 </a>
 
 </div>
@@ -118,11 +114,8 @@ We welcome contributions to Mumixic! Please review our [Contributing Guide](CONT
 
 Mumixic is free and always will be — if it's earned a spot in your rotation, you can chip in here:
 
-<a href="https://ko-fi.com/kushagrasinghx" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/donate/kofi-singular-alt/cozy.svg" alt="Support me on Ko-fi" height="55"/></a>
-<a href="https://paypal.me/kuxhagrasingh" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/donate/paypal-plural/cozy.svg" alt="Support us on PayPal" height="55"/></a>
 
 <br/>
-<img src="upi_support.jpg" alt="UPI Support" width="250" />
 
 </div>
 

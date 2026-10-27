@@ -58,6 +58,16 @@ enum class OutputPcmMode(val label: String) {
     FLOAT_32("32-bit float"),
 }
 
+/** Available typography font styles for UI customization. */
+enum class AppFont(val label: String) {
+    SF_PRO("SF Pro Display (Apple)"),
+    SYSTEM("System Default"),
+    SERIF("Serif"),
+    MONOSPACE("Monospace"),
+    SANS_SERIF("Sans-Serif"),
+    CURSIVE("Cursive"),
+}
+
 /**
  * What to keep when a track is saved to the device.
  *
@@ -342,6 +352,10 @@ object AppSettings {
     val themeMode = MutableStateFlow(ThemeMode.DARK)
     /** Persisted content URI for the user-selected app wallpaper. */
     val customBackgroundUri = MutableStateFlow<String?>(null)
+    /** Opacity and brightness visibility fraction (0.1 to 1.0) for the custom wallpaper. */
+    val customBackgroundBrightness = MutableStateFlow(0.75f)
+    /** Active application font family style. */
+    val appFont = MutableStateFlow(AppFont.SF_PRO)
 
     /** Keep playing similar music once the queue runs out. */
     val autoplay = MutableStateFlow(true)
@@ -853,6 +867,10 @@ object AppSettings {
             ThemeMode.valueOf(prefs.getString(KEY_THEME, null) ?: "DARK")
         }.getOrDefault(ThemeMode.DARK)
         customBackgroundUri.value = prefs.getString(KEY_CUSTOM_BACKGROUND_URI, null)
+        customBackgroundBrightness.value = prefs.getFloat(KEY_CUSTOM_BACKGROUND_BRIGHTNESS, 0.75f)
+        appFont.value = runCatching {
+            AppFont.valueOf(prefs.getString(KEY_APP_FONT, null) ?: AppFont.SF_PRO.name)
+        }.getOrDefault(AppFont.SF_PRO)
         autoplay.value = prefs.getBoolean(KEY_AUTOPLAY, true)
         shuffleEnabled.value = prefs.getBoolean(KEY_SHUFFLE_ENABLED, false)
         repeatMode.value = prefs.getInt(KEY_REPEAT_MODE, Player.REPEAT_MODE_OFF)
@@ -1225,6 +1243,17 @@ object AppSettings {
     fun setCustomBackgroundUri(value: String?) {
         customBackgroundUri.value = value
         prefs.edit().putString(KEY_CUSTOM_BACKGROUND_URI, value).apply()
+    }
+
+    fun setCustomBackgroundBrightness(value: Float) {
+        val clamped = value.coerceIn(0.1f, 1.0f)
+        customBackgroundBrightness.value = clamped
+        prefs.edit().putFloat(KEY_CUSTOM_BACKGROUND_BRIGHTNESS, clamped).apply()
+    }
+
+    fun setAppFont(value: AppFont) {
+        appFont.value = value
+        prefs.edit().putString(KEY_APP_FONT, value.name).apply()
     }
 
     fun setReduceAnimation(value: Boolean) {
@@ -2029,6 +2058,8 @@ object AppSettings {
     private const val KEY_SPEED = "playback_speed"
     private const val KEY_THEME = "theme_mode"
     private const val KEY_CUSTOM_BACKGROUND_URI = "custom_background_uri"
+    private const val KEY_CUSTOM_BACKGROUND_BRIGHTNESS = "custom_background_brightness"
+    private const val KEY_APP_FONT = "app_font"
     private const val KEY_AUTOPLAY = "autoplay"
     private const val KEY_SHUFFLE_ENABLED = "shuffle_enabled"
     private const val KEY_REPEAT_MODE = "repeat_mode"

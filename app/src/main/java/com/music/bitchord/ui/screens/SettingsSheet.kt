@@ -136,6 +136,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.SingletonImageLoader
 import coil3.compose.AsyncImage
+import com.music.bitchord.playback.AudioCache
 import com.music.bitchord.ui.components.isGlassSupported
 import com.music.bitchord.ui.components.languageDisplayNameRes
 import com.music.bitchord.ui.components.MessageState
@@ -160,7 +161,8 @@ import com.music.bitchord.data.settings.AudioQuality
 import com.music.bitchord.data.settings.DownloadQuality
 import com.music.bitchord.data.settings.ThemeMode
 import com.music.bitchord.data.stats.Backup
-import com.music.bitchord.playback.AudioCache
+import com.music.bitchord.data.settings.AppFont
+import com.music.bitchord.ui.theme.appFontFamily
 import com.music.bitchord.ui.player.fullBleedArtworkAvailable
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -229,6 +231,9 @@ fun SettingsScreen(
     val translationLanguage by AppSettings.translationLanguage.collectAsStateWithLifecycle()
     val theme by AppSettings.themeMode.collectAsStateWithLifecycle()
     val customBackgroundUri by AppSettings.customBackgroundUri.collectAsStateWithLifecycle()
+    val customBackgroundBrightness by AppSettings.customBackgroundBrightness.collectAsStateWithLifecycle()
+    val appFont by AppSettings.appFont.collectAsStateWithLifecycle()
+    var showFontDialog by remember { mutableStateOf(false) }
     val sessionId by AppSettings.audioSessionId.collectAsStateWithLifecycle()
     val outputPcmMode by AppSettings.outputPcmMode.collectAsStateWithLifecycle()
     val preferUsbDac by AppSettings.preferUsbDac.collectAsStateWithLifecycle()
@@ -836,6 +841,27 @@ fun SettingsScreen(
                         }
                     }
                 }
+                if (customBackgroundUri != null) {
+                    SliderRow(
+                        icon = Icons.Rounded.Brightness4,
+                        title = "Background visibility",
+                        value = "${(customBackgroundBrightness * 100).toInt()}%",
+                        sliderValue = customBackgroundBrightness,
+                        onSliderValue = AppSettings::setCustomBackgroundBrightness,
+                        valueRange = 0.1f..1.0f,
+                        steps = 18,
+                        subtitle = "Adjust custom background brightness",
+                    )
+                }
+            }
+            val appFontTitle = "Typography & font"
+            row(appFontTitle, "font", "typography", "text", "style") {
+                SettingsRow(
+                    icon = Icons.Rounded.Draw,
+                    title = appFontTitle,
+                    subtitle = appFont.label,
+                    onClick = { showFontDialog = true },
+                )
             }
             val reduceAnimationTitle = stringResource(R.string.reduce_animation)
             row(reduceAnimationTitle, "motion") {
@@ -1641,6 +1667,57 @@ fun SettingsScreen(
                 .padding(top = 24.dp, bottom = 8.dp),
         )
         }
+    }
+
+    if (showFontDialog) {
+        AlertDialog(
+            onDismissRequest = { showFontDialog = false },
+            title = { Text("Choose App Font") },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    AppFont.entries.forEach { fontOption ->
+                        val selected = fontOption == appFont
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .clickable {
+                                    AppSettings.setAppFont(fontOption)
+                                    showFontDialog = false
+                                }
+                                .padding(horizontal = 12.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Text(
+                                text = fontOption.label,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontFamily = appFontFamily(fontOption),
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                ),
+                                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                            )
+                            if (selected) {
+                                Icon(
+                                    Icons.Rounded.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp),
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showFontDialog = false }) {
+                    Text(stringResource(R.string.close))
+                }
+            },
+        )
     }
 
     picking?.let { target ->

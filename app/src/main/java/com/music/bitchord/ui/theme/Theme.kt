@@ -19,6 +19,11 @@ import androidx.compose.ui.text.style.TextGeometricTransform
 import androidx.compose.ui.unit.sp
 import com.music.bitchord.R
 
+import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.music.bitchord.data.settings.AppFont
+import com.music.bitchord.data.settings.AppSettings
+
 // Apple Music's signature red. No longer the primary accent, but kept for the
 // spots (Replay's rank badge) that want that specific red regardless of theme.
 val AccentRed = Color(0xFFFA2D48)
@@ -60,51 +65,33 @@ val SFProDisplay = FontFamily(
     Font(R.font.sf_pro_display_heavy, FontWeight.W800),
 )
 
-// Heavy, punchy extended typography — Horizon-styled main heads.
-private val BitChordTypography = Typography(
-    displayLarge = TextStyle(
-        fontWeight = FontWeight.Black,
-        fontSize = 34.sp,
-        letterSpacing = 1.2.sp,
-        textGeometricTransform = TextGeometricTransform(scaleX = 1.25f),
-    ),
-    displayMedium = TextStyle(
-        fontWeight = FontWeight.Black,
-        fontSize = 28.sp,
-        letterSpacing = 1.1.sp,
-        textGeometricTransform = TextGeometricTransform(scaleX = 1.22f),
-    ),
-    displaySmall = TextStyle(
-        fontWeight = FontWeight.Black,
-        fontSize = 26.sp,
-        letterSpacing = 1.0.sp,
-        textGeometricTransform = TextGeometricTransform(scaleX = 1.22f),
-    ),
-    headlineLarge = TextStyle(
-        fontWeight = FontWeight.Black,
-        fontSize = 30.sp,
-        letterSpacing = 1.0.sp,
-        textGeometricTransform = TextGeometricTransform(scaleX = 1.22f),
-    ),
-    headlineMedium = TextStyle(
-        fontWeight = FontWeight.Black,
-        fontSize = 22.sp,
-        letterSpacing = 0.8.sp,
-        textGeometricTransform = TextGeometricTransform(scaleX = 1.20f),
-    ),
-    headlineSmall = TextStyle(
-        fontWeight = FontWeight.Black,
-        fontSize = 18.sp,
-        letterSpacing = 0.6.sp,
-        textGeometricTransform = TextGeometricTransform(scaleX = 1.18f),
-    ),
+fun appFontFamily(font: AppFont): FontFamily = when (font) {
+    AppFont.SF_PRO -> SFProDisplay
+    AppFont.SYSTEM -> FontFamily.Default
+    AppFont.SERIF -> FontFamily.Serif
+    AppFont.MONOSPACE -> FontFamily.Monospace
+    AppFont.SANS_SERIF -> FontFamily.SansSerif
+    AppFont.CURSIVE -> FontFamily.Cursive
+}
+
+// Clean Apple Music typography scale without geometric horizontal distortion.
+private val BaseTypography = Typography(
+    displayLarge = TextStyle(fontWeight = FontWeight.W800, fontSize = 34.sp, letterSpacing = (-0.5).sp),
+    displayMedium = TextStyle(fontWeight = FontWeight.W700, fontSize = 28.sp, letterSpacing = (-0.4).sp),
+    displaySmall = TextStyle(fontWeight = FontWeight.W700, fontSize = 24.sp, letterSpacing = (-0.3).sp),
+    headlineLarge = TextStyle(fontWeight = FontWeight.W700, fontSize = 28.sp, letterSpacing = (-0.3).sp),
+    headlineMedium = TextStyle(fontWeight = FontWeight.W700, fontSize = 22.sp, letterSpacing = (-0.2).sp),
+    headlineSmall = TextStyle(fontWeight = FontWeight.W600, fontSize = 18.sp, letterSpacing = (-0.2).sp),
     titleLarge = TextStyle(fontWeight = FontWeight.W700, fontSize = 20.sp, letterSpacing = (-0.3).sp),
     titleMedium = TextStyle(fontWeight = FontWeight.W600, fontSize = 16.sp, letterSpacing = (-0.2).sp),
+    titleSmall = TextStyle(fontWeight = FontWeight.W600, fontSize = 14.sp),
     bodyLarge = TextStyle(fontWeight = FontWeight.W400, fontSize = 16.sp),
     bodyMedium = TextStyle(fontWeight = FontWeight.W400, fontSize = 14.sp),
+    bodySmall = TextStyle(fontWeight = FontWeight.W400, fontSize = 12.sp),
+    labelLarge = TextStyle(fontWeight = FontWeight.W600, fontSize = 14.sp),
     labelMedium = TextStyle(fontWeight = FontWeight.W600, fontSize = 12.sp),
     labelSmall = TextStyle(fontWeight = FontWeight.W600, fontSize = 11.sp),
-).withFamily(SFProDisplay)
+)
 
 /** Applies [family] to every style in the scale, so nothing is left on Roboto. */
 private fun Typography.withFamily(family: FontFamily) = Typography(
@@ -128,11 +115,15 @@ private fun Typography.withFamily(family: FontFamily) = Typography(
 @Composable
 fun BitChordTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    font: AppFont = AppSettings.appFont.collectAsStateWithLifecycle().value,
     content: @Composable () -> Unit,
 ) {
+    val typography = remember(font) {
+        BaseTypography.withFamily(appFontFamily(font))
+    }
     MaterialTheme(
         colorScheme = if (darkTheme) DarkColors else LightColors,
-        typography = BitChordTypography,
+        typography = typography,
         content = content,
     )
 }

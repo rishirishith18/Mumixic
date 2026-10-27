@@ -384,7 +384,8 @@ class MainActivity : AppCompatActivity() {
                 ThemeMode.LIGHT -> false
                 ThemeMode.DARK -> true
             }
-            BitChordTheme(darkTheme = darkTheme) {
+            val appFont by AppSettings.appFont.collectAsStateWithLifecycle()
+            BitChordTheme(darkTheme = darkTheme, font = appFont) {
                 // The glass surfaces sample this layer, and a layer records only
                 // what is drawn into it — which, for BitChord, is a page that
                 // paints no background of its own. Everywhere a page is not
@@ -487,6 +488,7 @@ private fun BitChordApp(
 ) {
     val context = LocalContext.current
     val customBackgroundUri by AppSettings.customBackgroundUri.collectAsStateWithLifecycle()
+    val customBackgroundBrightness by AppSettings.customBackgroundBrightness.collectAsStateWithLifecycle()
     val clipboard = LocalClipboardManager.current
     val hazeState = remember { HazeState() }
     // Recording the backdrop layer costs a draw pass, so it only runs when a
@@ -2544,8 +2546,17 @@ private fun BitChordApp(
                 model = imageUri,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize().alpha(0.88f),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(customBackgroundBrightness),
             )
+            if (customBackgroundBrightness < 1f) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = (1f - customBackgroundBrightness) * 0.7f)),
+                )
+            }
         }
         // A pushed album/artist/playlist page replaces the tab content but
         // leaves the tab bar and mini player in place.

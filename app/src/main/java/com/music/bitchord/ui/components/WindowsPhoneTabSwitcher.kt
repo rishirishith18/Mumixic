@@ -21,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextGeometricTransform
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,13 +53,12 @@ fun WindowsPhoneTabSwitcher(
                 Text(
                     text = tab.label.uppercase(),
                     style = MaterialTheme.typography.displaySmall.copy(
-                        fontSize = 32.sp,
-                        fontWeight = if (selected) FontWeight.Black else FontWeight.ExtraBold,
-                        letterSpacing = 1.5.sp,
-                        textGeometricTransform = TextGeometricTransform(scaleX = 1.25f),
+                        fontSize = 28.sp,
+                        fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
+                        letterSpacing = 0.5.sp,
                     ),
                     color = MaterialTheme.colorScheme.onBackground.copy(
-                        alpha = if (selected) 1f else 0.42f,
+                        alpha = if (selected) 1f else 0.45f,
                     ),
                     maxLines = 1,
                     overflow = TextOverflow.Clip,
@@ -69,8 +67,8 @@ fun WindowsPhoneTabSwitcher(
                 Box(
                     Modifier
                         .width(if (selected) 36.dp else 0.dp)
-                        .height(3.5.dp)
-                        .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp)),
+                        .height(3.dp)
+                        .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(1.5.dp)),
                 )
             }
         }

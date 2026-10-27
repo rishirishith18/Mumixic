@@ -266,6 +266,8 @@ import com.music.bitchord.ui.components.TopBarDownloadButton
 import com.music.bitchord.ui.components.optimizedHazeEffect
 import com.music.bitchord.ui.components.topBarContentPadding
 import com.music.bitchord.ui.components.AppLanguageDialog
+import com.music.bitchord.data.AppUpdateChecker
+import com.music.bitchord.ui.components.UpdateAvailableDialog
 import com.music.bitchord.ui.components.TranslationLanguageDialog
 import com.music.bitchord.ui.components.LyricsSourcesDialog
 import com.music.bitchord.ui.components.ServerEditorHost
@@ -582,6 +584,13 @@ private fun BitChordApp(
     var showWearOs by rememberSaveable { mutableStateOf(false) }
     var showEqualizer by rememberSaveable { mutableStateOf(false) }
     var showSpotifyCanvasAuth by remember { mutableStateOf(false) }
+    val availableUpdate by AppUpdateChecker.available.collectAsStateWithLifecycle()
+    var updateDismissed by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        AppUpdateChecker.clearCache(context)
+        AppUpdateChecker.check()
+    }
 
     // Hosted here rather than inside SourcesScreen so its frosted card has
     // something to blur: that screen is drawn inside the `hazeSource` subtree,
@@ -5358,6 +5367,40 @@ private fun BitChordApp(
             BackHandler { showSpotifyCanvasAuth = false }
             SpotifyCanvasAuthScreen(
                 onNavigateUp = { showSpotifyCanvasAuth = false }
+            )
+        }
+
+        val update = availableUpdate
+        if (update != null && !updateDismissed) {
+            val downloadState by AppUpdateChecker.download.collectAsStateWithLifecycle()
+            val updateScope = rememberCoroutineScope()
+            UpdateAvailableDialog(
+                version = update.version,
+                notes = update.notes,
+                hazeState = hazeState,
+                onDismiss = {
+                    if (downloadState !is AppUpdateChecker.DownloadState.Downloading) {
+                        updateDismissed = true
+                    }
+                },
+                onDownload = {
+                    updateScope.launch { AppUpdateChecker.downloadApk(context) }
+                },
+                onCancelDownload = {
+                    AppUpdateChecker.cancelDownload()
+                },
+                onInstall = {
+                    val ready = downloadState as? AppUpdateChecker.DownloadState.Ready
+                    if (ready != null) {
+                        AppUpdateChecker.installApk(context, ready.file)
+                    }
+                },
+                onOpenReleasePage = {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(update.releaseUrl)).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    runCatching { context.startActivity(intent) }
+                },
             )
         }
 

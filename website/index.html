@@ -9,16 +9,16 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Dynamic Ambient Background Glows -->
+  <!-- Ambient Background Lighting -->
   <div class="ambient-glow glow-1"></div>
   <div class="ambient-glow glow-2"></div>
   <div class="ambient-glow glow-3"></div>
 
   <main class="page-wrapper">
-    <!-- Centered Brand & Hero Section -->
+    <!-- Hero Section -->
     <section class="hero-section">
       <div class="hero-container">
-        <!-- Centered Mumixic Logo (Non-background Icon) and Title -->
+        <!-- Centered Mumixic Logo (Non-background Mark) and Brand Name -->
         <div class="brand-hero-center">
           <div class="logo-wrapper">
             <img src="assets/mumixic-mark.png" alt="Mumixic Logo" class="brand-logo-large">
@@ -29,7 +29,7 @@
 
         <div class="hero-header">
           <h2 class="hero-title">
-            Music, alive with <span class="gradient-text">color</span> and <span class="gradient-text-alt">emotion</span>.
+            Music, alive with color and emotion.
           </h2>
 
           <p class="hero-description">
@@ -39,7 +39,7 @@
           <!-- Centered Action Buttons (Android & GitHub) -->
           <div class="hero-cta-group">
             <a href="assets/Mumixic-latest.apk" download="Mumixic-latest.apk" class="cta-button cta-primary" id="hero-download-apk">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                 <path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85-.29-.15-.68-.05-.85.26l-1.9 3.29C14.88 8.35 13.48 8 12 8s-2.88.35-4.43 1L5.67 5.71c-.17-.31-.56-.41-.85-.26-.3.16-.42.54-.26.85l1.84 3.18C3.8 11.08 2 13.92 2 17.25h20c0-3.33-1.8-6.17-4.4-7.77zM7 14.5c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25zm10 0c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25z"/>
               </svg>
               <div class="cta-text">
@@ -49,7 +49,7 @@
             </a>
 
             <a href="https://github.com/rishirishith18/Mumixic" target="_blank" rel="noopener noreferrer" class="cta-button cta-secondary" id="hero-github-link">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
               </svg>
               <div class="cta-text">
@@ -91,7 +91,6 @@
     <section class="features-section" id="features">
       <div class="section-container">
         <div class="section-header">
-          <span class="section-eyebrow">REFINED ENGINEERING</span>
           <h2 class="section-title">Designed with reverence for sound.</h2>
           <p class="section-subtitle">
             Every element in Mumixic is stripped of bloat and tuned for tactile responsiveness, aesthetic poise, and musical fidelity.
@@ -217,7 +216,6 @@
     <section class="specs-section" id="specs">
       <div class="section-container">
         <div class="section-header">
-          <span class="section-eyebrow">SPECIFICATIONS</span>
           <h2 class="section-title">Technical Architecture</h2>
           <p class="section-subtitle">
             Built modern from the ground up on Jetpack Compose, Kotlin Multiplatform, and precision audio pipelines.
@@ -261,6 +259,55 @@
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Engine Attribution & Special Thanks (BitChord & kushagrasinghx) -->
+    <section class="attribution-section">
+      <div class="section-container">
+        <div class="attribution-card">
+          <div class="attribution-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+          </div>
+          <div class="attribution-content">
+            <h3 class="attribution-title">Built with the support of BitChord</h3>
+            <p class="attribution-desc">
+              Mumixic proudly utilizes the powerful <strong>BitChord Music Engine</strong> for seamless YouTube Music streaming, high-bitrate audio resolution, and robust caching. Heartfelt thanks to the BitChord open-source project and lead developer <a href="https://github.com/kushagrasinghx" target="_blank" rel="noopener noreferrer" class="credit-author-link"><strong>kushagrasinghx</strong></a> on GitHub for their foundational work and audio craftsmanship.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seamless Borderless Closing Outro (Logo next to name, Android & GitHub buttons) -->
+    <section class="closing-outro-section">
+      <div class="section-container">
+        <div class="outro-wrapper">
+          <!-- Logo next to Mumixic name -->
+          <div class="outro-brand">
+            <img src="assets/mumixic-mark.png" alt="Mumixic Logo" class="outro-logo">
+            <span class="outro-name">Mumixic</span>
+          </div>
+
+          <!-- Same Android and GitHub Actions -->
+          <div class="outro-actions">
+            <a href="assets/Mumixic-latest.apk" download="Mumixic-latest.apk" class="outro-btn outro-btn-primary" id="outro-download-apk">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                <path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85-.29-.15-.68-.05-.85.26l-1.9 3.29C14.88 8.35 13.48 8 12 8s-2.88.35-4.43 1L5.67 5.71c-.17-.31-.56-.41-.85-.26-.3.16-.42.54-.26.85l1.84 3.18C3.8 11.08 2 13.92 2 17.25h20c0-3.33-1.8-6.17-4.4-7.77zM7 14.5c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25zm10 0c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25z"/>
+              </svg>
+              <span>Download for Android</span>
+            </a>
+
+            <a href="https://github.com/rishirishith18/Mumixic" target="_blank" rel="noopener noreferrer" class="outro-btn outro-btn-secondary" id="outro-github-link">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+              </svg>
+              <span>GitHub</span>
+            </a>
+          </div>
         </div>
       </div>
     </section>

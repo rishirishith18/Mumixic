@@ -46,7 +46,7 @@ extra["bitchordVersionCode"] = (providers.gradleProperty("mumixic.versionCode").
     ?: 28)
 extra["bitchordVersionName"] = (providers.gradleProperty("mumixic.version").orNull
     ?: providers.gradleProperty("bitchord.version").orNull
-    ?: "1.8.1")
+    ?: "1.8.0")
 
 /*
  * Bump this by hand before cutting each sideloaded test build ("beta2",

@@ -17,6 +17,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.CubicBezierEasing
@@ -395,10 +398,13 @@ class MainActivity : AppCompatActivity() {
                 // and text came through it untouched. The window's background is
                 // the floor the pages have always been drawn against, so it is
                 // laid down here too and the recording is opaque like the screen.
+                val customBackgroundUri by AppSettings.customBackgroundUri.collectAsStateWithLifecycle()
                 val windowBackground = MaterialTheme.colorScheme.background
-                val paintBackdrop: ContentDrawScope.() -> Unit = remember(windowBackground) {
+                val paintBackdrop: ContentDrawScope.() -> Unit = remember(windowBackground, customBackgroundUri) {
                     {
-                        drawRect(windowBackground)
+                        if (customBackgroundUri == null) {
+                            drawRect(windowBackground)
+                        }
                         drawContent()
                     }
                 }
@@ -409,16 +415,6 @@ class MainActivity : AppCompatActivity() {
                     LocalAppBackdrop provides appBackdrop,
                 ) {
                 // The window's width, measured rather than asked for.
-                //
-                // `Configuration.screenWidthDp` is the wrong question here: in a
-                // freeform or desktop window it can report the display rather
-                // than the window it is actually in, and it lands a beat late
-                // when that window is dragged. The layout downstream splits in
-                // two on the strength of this number and sizes both halves from
-                // it, so a stale one is a player pane sized for a window that no
-                // longer exists and a page squeezed to a sliver to pay for it.
-                // A measured constraint cannot be stale — it is the very width
-                // the split is about to be laid out in.
                 BoxWithConstraints(Modifier.fillMaxSize()) {
                     BitChordApp(
                         darkTheme = darkTheme,
@@ -426,6 +422,56 @@ class MainActivity : AppCompatActivity() {
                         windowHeight = maxHeight,
                         appBackdrop = appBackdrop,
                     )
+
+                    // Startup splash screen overlay with the signature dark pink to dark blue-purple gradient
+                    var splashDismissed by remember { mutableStateOf(false) }
+                    LaunchedEffect(Unit) {
+                        kotlinx.coroutines.delay(650)
+                        splashDismissed = true
+                    }
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = !splashDismissed,
+                        exit = fadeOut(tween(420, easing = androidx.compose.animation.core.LinearEasing)),
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    androidx.compose.ui.graphics.Brush.linearGradient(
+                                        colors = listOf(
+                                            androidx.compose.ui.graphics.Color(0xFF8A1249),
+                                            androidx.compose.ui.graphics.Color(0xFF4A0F3D),
+                                            androidx.compose.ui.graphics.Color(0xFF0F0728),
+                                        ),
+                                        start = androidx.compose.ui.geometry.Offset.Zero,
+                                        end = androidx.compose.ui.geometry.Offset(1000f, 2000f),
+                                    ),
+                                ),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center,
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_mumixic_mark),
+                                    contentDescription = "Mumixic",
+                                    tint = androidx.compose.ui.graphics.Color.White,
+                                    modifier = Modifier.size(92.dp),
+                                )
+                                Spacer(Modifier.height(18.dp))
+                                Text(
+                                    text = "Mumixic",
+                                    style = MaterialTheme.typography.headlineMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        letterSpacing = 1.5.sp,
+                                    ),
+                                    color = androidx.compose.ui.graphics.Color.White,
+                                )
+                            }
+                        }
+                    }
                 }
                 }
             }
@@ -2539,7 +2585,7 @@ private fun BitChordApp(
     Box(
         Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(if (customBackgroundUri == null) MaterialTheme.colorScheme.background else androidx.compose.ui.graphics.Color.Black),
     ) {
         customBackgroundUri?.let { imageUri ->
             val bgModel = remember(imageUri) {

@@ -200,8 +200,13 @@ private fun rememberArtworkSeed(imageUrl: String?, artPx: Int): Seed? {
 
     LaunchedEffect(imageUrl, artPx) {
         if (imageUrl == null || seed != null) return@LaunchedEffect
+        val model: Any = if (imageUrl.startsWith("file://") || imageUrl.startsWith("/")) {
+            java.io.File(imageUrl.removePrefix("file://"))
+        } else {
+            imageUrl.artworkAt(artPx) ?: imageUrl
+        }
         val request = ImageRequest.Builder(context)
-            .data(imageUrl.artworkAt(artPx))
+            .data(model)
             .size(PALETTE_PX)
             .forPixelAccess()
             .build()

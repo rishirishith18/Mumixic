@@ -341,7 +341,14 @@ fun SettingsScreen(
         if (imageUri != null) {
             backupScope.launch(Dispatchers.IO) {
                 runCatching {
-                    val destFile = java.io.File(context.filesDir, "custom_background.jpg")
+                    // Clean up any previously saved custom background files
+                    val oldFiles = context.filesDir.listFiles { f ->
+                        f.name.startsWith("custom_bg_") || f.name == "custom_background.jpg"
+                    }
+                    oldFiles?.forEach { it.delete() }
+
+                    val timestamp = System.currentTimeMillis()
+                    val destFile = java.io.File(context.filesDir, "custom_bg_$timestamp.jpg")
                     context.contentResolver.openInputStream(imageUri)?.use { input ->
                         destFile.outputStream().use { output ->
                             input.copyTo(output)
@@ -774,8 +781,10 @@ fun SettingsScreen(
                         if (customBackgroundUri != null) {
                             TextButton(onClick = {
                                 backupScope.launch(Dispatchers.IO) {
-                                    val file = java.io.File(context.filesDir, "custom_background.jpg")
-                                    if (file.exists()) file.delete()
+                                    val files = context.filesDir.listFiles { f ->
+                                        f.name.startsWith("custom_bg_") || f.name == "custom_background.jpg"
+                                    }
+                                    files?.forEach { it.delete() }
                                     AppSettings.setCustomBackgroundUri(null)
                                 }
                             }) {

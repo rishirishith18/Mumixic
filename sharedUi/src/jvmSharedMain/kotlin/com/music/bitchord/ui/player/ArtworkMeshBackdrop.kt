@@ -110,10 +110,15 @@ fun rememberFullArtworkBlurImage(
             image = cached
             return@LaunchedEffect
         }
+        val model: Any = if (imageUrl.startsWith("file://") || imageUrl.startsWith("/")) {
+            java.io.File(imageUrl.removePrefix("file://"))
+        } else {
+            imageUrl.artworkAt(artPx) ?: imageUrl
+        }
         val request = ImageRequest.Builder(context)
             // Same URL as the player's 1200px sleeve, so this is a small decode
             // from Coil's shared fetch/disk result rather than another download.
-            .data(imageUrl.artworkAt(artPx))
+            .data(model)
             .size(FULL_BLUR_SOURCE_PX)
             .forPixelAccess()
             .build()
@@ -248,8 +253,13 @@ fun rememberArtworkMesh(
 
     LaunchedEffect(imageUrl, artPx) {
         if (imageUrl == null || meshUrl == imageUrl) return@LaunchedEffect
+        val model: Any = if (imageUrl.startsWith("file://") || imageUrl.startsWith("/")) {
+            java.io.File(imageUrl.removePrefix("file://"))
+        } else {
+            imageUrl.artworkAt(artPx) ?: imageUrl
+        }
         val request = ImageRequest.Builder(context)
-            .data(imageUrl.artworkAt(artPx))
+            .data(model)
             .size(MESH_PX)
             .forPixelAccess() // the sleeve has to be read back pixel by pixel
             .build()

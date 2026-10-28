@@ -89,9 +89,12 @@ suspend fun renderReplayPoster(
         val canvas = Canvas(bitmap)
         val type = Fonts(context)
 
+        // Gather random album and artist covers for the background collage
+        val bgBitmaps = covers.values.filterNotNull().shuffled()
+
         // The same cover and the same turn of the colour wheel the card on
         // screen was drawn with, so the picture is recognisably that card.
-        drawBackdrop(canvas, covers[lit], page?.let(::storyHue) ?: 0f)
+        drawBackdrop(canvas, covers[lit], page?.let(::storyHue) ?: 0f, backgroundArt = bgBitmaps)
         var y = drawHeader(canvas, context, type, summary, holder, memberSince)
         if (page == null) {
             y = drawTotals(canvas, context, type, summary, y)
@@ -299,9 +302,48 @@ internal fun drawBackdrop(
     lead: Bitmap?,
     hue: Float,
     height: Float = POSTER_H.toFloat(),
+    backgroundArt: List<Bitmap> = emptyList(),
 ) {
     val colors = paletteOf(lead).map { rotated(it, hue) }
     canvas.drawColor(dimmed(colors.first()))
+
+    // Draw random artist and album covers scattered in the background
+    if (backgroundArt.isNotEmpty()) {
+        val artPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            alpha = 80 // subtle opacity so background art is visible but blends elegantly
+        }
+        val layoutAnchors = listOf(
+            Triple(0.04f, 0.10f, 340f),
+            Triple(0.66f, 0.06f, 310f),
+            Triple(0.70f, 0.38f, 360f),
+            Triple(0.02f, 0.50f, 320f),
+            Triple(0.32f, 0.70f, 380f),
+            Triple(0.68f, 0.78f, 300f),
+        )
+        backgroundArt.take(layoutAnchors.size).forEachIndexed { i, bmp ->
+            val (fx, fy, size) = layoutAnchors[i]
+            val x = POSTER_W * fx
+            val y = height * fy
+            val rect = RectF(x, y, x + size, y + size)
+            val corner = 32f
+            canvas.save()
+            val rotation = if (i % 2 == 0) -5f else 5f
+            canvas.rotate(rotation, x + size / 2f, y + size / 2f)
+
+            val scale = maxOf(size / bmp.width.toFloat(), size / bmp.height.toFloat())
+            val matrix = Matrix().apply {
+                setScale(scale, scale)
+                postTranslate(x, y)
+            }
+            val shader = BitmapShader(bmp, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP).apply {
+                setLocalMatrix(matrix)
+            }
+            artPaint.shader = shader
+            canvas.drawRoundRect(rect, corner, corner, artPaint)
+            artPaint.shader = null
+            canvas.restore()
+        }
+    }
 
     val anchors = listOf(
         0.20f to 0.16f,
@@ -320,7 +362,7 @@ internal fun drawBackdrop(
             cy,
             radius,
             intArrayOf(
-                ColorUtils.setAlphaComponent(color, 210),
+                ColorUtils.setAlphaComponent(color, 200),
                 ColorUtils.setAlphaComponent(color, 0),
             ),
             floatArrayOf(0f, 1f),
@@ -330,14 +372,14 @@ internal fun drawBackdrop(
     }
     paint.shader = null
 
-    // Ink, weighted to the foot where the smaller type is.
+    // Ink, weighted to keep typography, stats and charts perfectly readable
     paint.shader = android.graphics.LinearGradient(
         0f,
         0f,
         0f,
         height,
-        intArrayOf(0x8C000000.toInt(), 0x59000000, 0xCC000000.toInt()),
-        floatArrayOf(0f, 0.42f, 1f),
+        intArrayOf(0x7A000000.toInt(), 0x55000000, 0xD4000000.toInt()),
+        floatArrayOf(0f, 0.45f, 1f),
         Shader.TileMode.CLAMP,
     )
     canvas.drawRect(0f, 0f, POSTER_W.toFloat(), height, paint)
@@ -403,45 +445,40 @@ private fun drawHeader(
         "REVERPLAY · $label"
     }
 
-    val brand = type.heading(44f, 0xFFFFFFFF.toInt()).apply {
+    // Top Right: Clean Mumixic logo and brand text - NO BOX!
+    val brand = type.heading(42f, 0xFFFFFFFF.toInt()).apply {
         textAlign = Paint.Align.RIGHT
+        setShadowLayer(8f, 0f, 3f, 0x99000000.toInt())
     }
     val wordWidth = brand.measureText("Mumixic")
     val brandRight = POSTER_W - MARGIN
     val logoRight = brandRight - wordWidth - LOGO_GAP
     val brandLeft = logoRight - LOGO_W
 
-    // Draw a prominent, sleek glass badge behind the brand logo + Mumixic text
-    // so Mumixic is distinctly and cleanly visible on ANY album art background:
-    val badgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0x66000000.toInt()
-        style = Paint.Style.FILL
-    }
-    val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0x33FFFFFF
-        style = Paint.Style.STROKE
-        strokeWidth = 2.5f
-    }
-    val badgeRect = RectF(brandLeft - 22f, 132f - 44f, brandRight + 16f, 132f + 16f)
-    canvas.drawRoundRect(badgeRect, 24f, 24f, badgePaint)
-    canvas.drawRoundRect(badgeRect, 24f, 24f, borderPaint)
+    // Draw Mumixic brand text & logo cleanly with no box or border container
+    canvas.drawText("Mumixic", brandRight, 126f, brand)
+    drawLogo(canvas, context, logoRight, 126f)
 
-    // Draw Mumixic brand text & logo inside the badge
-    canvas.drawText("Mumixic", brandRight, 132f, brand)
-    drawLogo(canvas, context, logoRight, 132f)
-
-    // Ellipsize title so it NEVER collides with the brand badge
-    val maxTitleWidth = brandLeft - 44f - MARGIN
-    val titlePaint = type.heading(46f, 0xFFFFFFFF.toInt())
+    // Top Left: Title ("REVERPLAY '26"), cleanly bounded to never overlap the brand
+    val titlePaint = type.heading(46f, 0xFFFFFFFF.toInt()).apply {
+        setShadowLayer(8f, 0f, 3f, 0x99000000.toInt())
+    }
+    val maxTitleWidth = brandLeft - 48f - MARGIN
     val fitTitle = ellipsised(title, titlePaint, maxTitleWidth)
-    canvas.drawText(fitTitle, MARGIN, 132f, titlePaint)
+    canvas.drawText(fitTitle, MARGIN, 126f, titlePaint)
 
+    // Second Row: User's Name / Holder prominently displayed on its OWN row below
+    // Positioned cleanly at y = 188f across full CONTENT_W so it NEVER overlaps the logo!
     val credit = listOfNotNull(
         holder.ifBlank { context.getString(R.string.default_replay_holder) },
         memberSince?.let { context.getString(R.string.member_since_value, it) },
     ).joinToString(" · ")
-    canvas.drawText(credit.uppercase(Locale.ROOT), MARGIN, 182f, type.label(24f, 0x8CFFFFFF.toInt()))
-    return 300f
+    val userPaint = type.label(30f, 0xEEFFFFFF.toInt(), tracking = 0.08f).apply {
+        setShadowLayer(6f, 0f, 2f, 0x99000000.toInt())
+    }
+    canvas.drawText(ellipsised(credit.uppercase(Locale.ROOT), userPaint, CONTENT_W), MARGIN, 190f, userPaint)
+
+    return 290f
 }
 
 private fun drawTotals(

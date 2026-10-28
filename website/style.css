@@ -194,6 +194,20 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-main);
 }
 
+.highlight-color {
+  background: linear-gradient(135deg, #ff375f 0%, #e024c3 45%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.highlight-emotion {
+  background: linear-gradient(135deg, #00c6ff 0%, #0072ff 45%, #7000ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
 .hero-description {
   font-size: 1.25rem;
   color: var(--text-secondary);
@@ -636,6 +650,22 @@ h1, h2, h3, h4, h5, h6 {
   background: #28282b;
   border-color: var(--border-active);
   transform: translateY(-1px);
+}
+
+/* Legal Disclaimers (Muted Apple-style copy) */
+.legal-disclaimers {
+  margin-top: 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 960px;
+}
+
+.legal-disclaimers p {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.55;
+  letter-spacing: -0.01em;
 }
 
 /* Responsive Breakpoints */

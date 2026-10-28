@@ -5,74 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mumixic — Living Gradients, Synced Lyrics & Pure Sound</title>
   <meta name="description" content="Mumixic is an ultra-fast, open source music player featuring living fluid gradients, time-synced lyrics, lossless audio streaming, and deep customization.">
-  <link rel="icon" type="image/jpeg" href="assets/mumixic-logo.jpg">
+  <link rel="icon" type="image/png" href="assets/mumixic-mark.png">
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="font-serif-headers">
+<body>
   <!-- Dynamic Ambient Background Glows -->
   <div class="ambient-glow glow-1"></div>
   <div class="ambient-glow glow-2"></div>
   <div class="ambient-glow glow-3"></div>
 
-  <!-- Navigation Bar -->
-  <header class="navbar">
-    <div class="nav-container">
-      <a href="#" class="brand" id="brand-link">
-        <img src="assets/mumixic-logo.jpg" alt="Mumixic Logo" class="brand-logo">
-        <span class="brand-text">Mumixic</span>
-      </a>
-
-      <nav class="nav-links">
-        <a href="#features">Features</a>
-        <a href="#experience">Experience</a>
-        <a href="#specs">Specifications</a>
-        <a href="#download">Download</a>
-      </nav>
-
-      <div class="nav-actions">
-        <!-- Font Switcher -->
-        <div class="font-toggle-wrapper" title="Switch Header Font Style">
-          <button class="font-toggle-btn active" id="btn-font-serif">Serif</button>
-          <span class="font-divider">/</span>
-          <button class="font-toggle-btn" id="btn-font-helvetica">Helvetica</button>
-        </div>
-
-        <!-- GitHub Icon Link -->
-        <a href="https://github.com/rishirishith18/Mumixic" target="_blank" rel="noopener noreferrer" class="icon-link github-link" aria-label="Mumixic on GitHub" title="View Source on GitHub">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-          </svg>
-        </a>
-
-        <!-- Android Download Nav Button -->
-        <a href="#download" class="btn btn-primary" id="nav-download-btn">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-            <path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85-.29-.15-.68-.05-.85.26l-1.9 3.29C14.88 8.35 13.48 8 12 8s-2.88.35-4.43 1L5.67 5.71c-.17-.31-.56-.41-.85-.26-.3.16-.42.54-.26.85l1.84 3.18C3.8 11.08 2 13.92 2 17.25h20c0-3.33-1.8-6.17-4.4-7.77zM7 14.5c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25zm10 0c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25z"/>
-          </svg>
-          <span>Get APK</span>
-        </a>
-      </div>
-    </div>
-  </header>
-
-  <!-- Hero Section -->
-  <main>
+  <main class="page-wrapper">
+    <!-- Centered Brand & Hero Section -->
     <section class="hero-section">
       <div class="hero-container">
-        <div class="hero-header">
-          <div class="hero-brand-badge">
-            <img src="assets/mumixic-logo.jpg" alt="Logo Mark" class="hero-mini-logo">
-            <span class="hero-kicker">MUMIXIC OPEN SOURCE</span>
+        <!-- Centered Mumixic Logo (Non-background Icon) and Title -->
+        <div class="brand-hero-center">
+          <div class="logo-wrapper">
+            <img src="assets/mumixic-mark.png" alt="Mumixic Logo" class="brand-logo-large">
           </div>
+          <h1 class="brand-name">Mumixic</h1>
+          <p class="brand-tagline">Open Source Music Player</p>
+        </div>
 
-          <h1 class="hero-title">
+        <div class="hero-header">
+          <h2 class="hero-title">
             Music, alive with <span class="gradient-text">color</span> and <span class="gradient-text-alt">emotion</span>.
-          </h1>
+          </h2>
 
           <p class="hero-description">
             An ultra-sleek, privacy-respecting music player engineered with living mesh gradients, real-time synchronized lyrics, audiophile lossless caching, and granular typography controls.
           </p>
 
+          <!-- Centered Action Buttons (Android & GitHub) -->
           <div class="hero-cta-group">
             <a href="assets/Mumixic-latest.apk" download="Mumixic-latest.apk" class="cta-button cta-primary" id="hero-download-apk">
               <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
@@ -80,7 +44,7 @@
               </svg>
               <div class="cta-text">
                 <span class="cta-label">Download for Android</span>
-                <span class="cta-sub">Universal APK (v1.0.0)</span>
+                <span class="cta-sub">Universal APK</span>
               </div>
             </a>
 
@@ -90,7 +54,7 @@
               </svg>
               <div class="cta-text">
                 <span class="cta-label">Source Code</span>
-                <span class="cta-sub">rishirishith18 / Mumixic</span>
+                <span class="cta-sub">GitHub Repository</span>
               </div>
             </a>
           </div>
@@ -203,7 +167,7 @@
             </div>
             <h3 class="feature-heading">Curated Typography</h3>
             <p class="feature-text">
-              Choose the typographic personality that speaks to you. Seamlessly toggle between Apple's SF Pro, classical Serif, clean Sans-Serif, Monospace, or Cursive directly inside Settings.
+              Choose the typographic personality that speaks to you. Seamlessly toggle between SF Pro, Classical Serif, clean Sans-Serif, Monospace, or Cursive directly inside Settings.
             </p>
             <div class="feature-detail">
               <span class="detail-label">Built-in:</span> Live in-app preview with zero horizontal distortion or unnatural geometric stretching.
@@ -245,59 +209,6 @@
               <span class="detail-label">Continuity:</span> OTA in-app update checks, Discord Rich Presence, and media notification controls.
             </div>
           </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- Interactive Experience Highlight -->
-    <section class="experience-section">
-      <div class="section-container">
-        <div class="experience-card">
-          <div class="experience-content">
-            <span class="section-eyebrow">TAILORED AESTHETICS</span>
-            <h2 class="experience-title">A UI that respects your taste.</h2>
-            <p class="experience-text">
-              No sponsored carousels, no tracking telemetry, no clutter. Just pure musical immersion with high-contrast typography, custom wallpaper adjustments, and haptic feedback.
-            </p>
-
-            <div class="specs-list">
-              <div class="spec-row">
-                <span class="spec-name">Aesthetic Style</span>
-                <span class="spec-val">Apple Music-inspired Fluid Glass & Mesh</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-name">Header Typography</span>
-                <span class="spec-val">Classical Serif / Crisp Helvetica</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-name">Background Visibility</span>
-                <span class="spec-val">Custom 10%–100% Brightness Slider</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-name">Privacy Model</span>
-                <span class="spec-val">100% Free & Open Source (No Trackers)</span>
-              </div>
-            </div>
-
-            <div class="experience-links">
-              <a href="https://github.com/rishirishith18/Mumixic" target="_blank" rel="noopener noreferrer" class="link-arrow">
-                <span>Explore the GitHub Repository</span>
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M5 12h14M12 5l7 7-7 7"></path>
-                </svg>
-              </a>
-            </div>
-          </div>
-
-          <div class="experience-visual">
-            <div class="glass-artwork-card">
-              <img src="assets/mumixic-logo.jpg" alt="Mumixic Ribbon Logo" class="glass-logo-large">
-              <div class="glass-caption">
-                <span class="glass-title">Mumixic</span>
-                <span class="glass-sub">The modern open source music player</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
@@ -353,86 +264,7 @@
         </div>
       </div>
     </section>
-
-    <!-- Download Section -->
-    <section class="download-section" id="download">
-      <div class="section-container">
-        <div class="download-box">
-          <div class="download-content">
-            <span class="section-eyebrow">INSTALL MUMIXIC</span>
-            <h2 class="download-title">Get started in seconds.</h2>
-            <p class="download-desc">
-              Download the standalone Android APK or clone the source code on GitHub. No account or subscription required.
-            </p>
-
-            <div class="download-grid">
-              <!-- Android Universal APK -->
-              <a href="assets/Mumixic-latest.apk" download="Mumixic-latest.apk" class="download-card" id="download-universal">
-                <div class="dl-icon-circle android">
-                  <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
-                    <path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85-.29-.15-.68-.05-.85.26l-1.9 3.29C14.88 8.35 13.48 8 12 8s-2.88.35-4.43 1L5.67 5.71c-.17-.31-.56-.41-.85-.26-.3.16-.42.54-.26.85l1.84 3.18C3.8 11.08 2 13.92 2 17.25h20c0-3.33-1.8-6.17-4.4-7.77zM7 14.5c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25zm10 0c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25z"/>
-                  </svg>
-                </div>
-                <div class="dl-info">
-                  <span class="dl-title">Android Universal APK</span>
-                  <span class="dl-meta">ARM64, ARMv7, x86_64 • Direct Install</span>
-                </div>
-                <div class="dl-action">
-                  <span class="dl-badge">Download</span>
-                </div>
-              </a>
-
-              <!-- GitHub Repo -->
-              <a href="https://github.com/rishirishith18/Mumixic" target="_blank" rel="noopener noreferrer" class="download-card" id="download-github">
-                <div class="dl-icon-circle github">
-                  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-                  </svg>
-                </div>
-                <div class="dl-info">
-                  <span class="dl-title">GitHub Repository</span>
-                  <span class="dl-meta">Star, fork, and contribute on GitHub</span>
-                </div>
-                <div class="dl-action">
-                  <span class="dl-badge">View Source</span>
-                </div>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
   </main>
-
-  <!-- Footer -->
-  <footer class="site-footer">
-    <div class="footer-container">
-      <div class="footer-left">
-        <div class="footer-brand">
-          <img src="assets/mumixic-logo.jpg" alt="Logo" class="footer-logo">
-          <span class="footer-brand-name">Mumixic</span>
-        </div>
-        <p class="footer-text">
-          Living gradients, time-synced lyrics, and pure open source audio craftsmanship.
-        </p>
-      </div>
-
-      <div class="footer-right">
-        <a href="https://github.com/rishirishith18/Mumixic" target="_blank" rel="noopener noreferrer" class="footer-link">
-          GitHub
-        </a>
-        <a href="https://github.com/rishirishith18/Mumixic/releases" target="_blank" rel="noopener noreferrer" class="footer-link">
-          Releases
-        </a>
-        <a href="https://github.com/rishirishith18/Mumixic/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="footer-link">
-          License
-        </a>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>&copy; 2026 Mumixic Project. Built for music lovers everywhere.</p>
-    </div>
-  </footer>
 
   <script src="main.js"></script>
 </body>

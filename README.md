@@ -17,7 +17,7 @@
 
 <br/>
 
-[**Download**](#download) · [**Features**](#features) · [**Contributing**](#contributing) · [**Credits & Licenses**](#credits-and-licenses) · [**Support**](#support) · [**Disclaimer**](#disclaimer)
+[**Download**](#download) · [**Features**](#features) · [**Credits & Licenses**](#credits-and-licenses) · [**Disclaimer**](#disclaimer)
 
 <br/>
 </div>
@@ -100,23 +100,9 @@ Grab the latest signed APKs directly from the [Releases](https://github.com/rish
 
 <div align="center">
 
-<h1><a id="contributing"></a>Contributing</h1>
-
-We welcome contributions to Mumixic! Please review our [Contributing Guide](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md) before submitting a Pull Request.
-
-[**Contributing Guide**](CONTRIBUTING.md) · [**Code of Conduct**](CODE_OF_CONDUCT.md) · [**Maintainers**](MAINTAINERS.md) · [**Additional Docs**](ADDITIONAL.md)
-
-### Thanks to all contributors ❤
-
-<a href="https://github.com/rishirishith18/Mumixic/graphs/contributors">
-  <img src="https://raw.githubusercontent.com/rishirishith18/Mumixic/contributors/contributors.svg" />
-</a>
-
-</div>
-
----
-
 <h1><a id="credits-and-licenses"></a>Credits and Licenses</h1>
+
+<div align="left">
 
 This is an unofficial port of [BitChord by Kushagra Singh](https://github.com/kushagrasinghx/BitChord). The upstream source is pinned as a Git submodule at [fe198ac](https://github.com/kushagrasinghx/BitChord/tree/fe198ac); its source, per-file notices, and license are available in `vendor/bitchord-upstream` when the submodule is initialized. See the upstream repository's [maintainers and contributors](https://github.com/kushagrasinghx/BitChord/blob/fe198ac/MAINTAINERS.md) for upstream attribution.
 
@@ -124,16 +110,7 @@ YouTube stream extraction uses [InnerTubeX](https://github.com/MetrolistGroup/in
 
 Some analyzer code was ported from [Orchard](https://github.com/SFG5453/Orchard), by SFG545, through BitChord's Android implementation. The relevant files identify SFG545 and Kushagra Singh and retain their AGPLv3-or-later terms. The audio clarity contour also credits the [LastWave-native](https://github.com/Clash-Projects/LastWave-native) reference in its source and notices. The upstream README credits [binimum/am-lyrics](https://github.com/binimum/am-lyrics) for the Apple-like lyrics animation; that credit is preserved here.
 
----
-
-<div align="center">
-
-<h1><a id="support"></a>Support</h1>
-
-Mumixic is free and open-source — if it's earned a spot in your rotation, you can chip in here:
-
-<a href="https://ko-fi.com/kushagrasinghx" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/donate/kofi-singular-alt/cozy.svg" alt="Support me on Ko-fi" height="55"/></a>
-<a href="https://paypal.me/kuxhagrasingh" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/donate/paypal-plural/cozy.svg" alt="Support us on PayPal" height="55"/></a>
+</div>
 
 </div>
 

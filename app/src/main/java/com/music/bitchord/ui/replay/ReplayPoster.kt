@@ -398,20 +398,43 @@ private fun drawHeader(
 ): Float {
     val label = summary.localizedLabel(context)
     val title = if (label.length == 4 && label.all { it.isDigit() }) {
-        "Replay ${label.takeLast(2)}"
+        "REVERPLAY ${label.takeLast(2)}"
     } else {
-        "Replay · $label"
+        "REVERPLAY · $label"
     }
-    canvas.drawText(title, MARGIN, 132f, type.heading(46f, 0xFFFFFFFF.toInt()))
-    val brand = type.heading(46f, 0xE6FFFFFF.toInt()).apply {
+
+    val brand = type.heading(44f, 0xFFFFFFFF.toInt()).apply {
         textAlign = Paint.Align.RIGHT
     }
-    canvas.drawText("Mumixic", POSTER_W - MARGIN, 132f, brand)
-    // The mark, to the left of the word, exactly as the story header and the
-    // card carry it. Without it the one artefact of this app that ends up in
-    // somebody else's chat was the only place the logo didn't appear.
     val wordWidth = brand.measureText("Mumixic")
-    drawLogo(canvas, context, POSTER_W - MARGIN - wordWidth - LOGO_GAP, 132f)
+    val brandRight = POSTER_W - MARGIN
+    val logoRight = brandRight - wordWidth - LOGO_GAP
+    val brandLeft = logoRight - LOGO_W
+
+    // Draw a prominent, sleek glass badge behind the brand logo + Mumixic text
+    // so Mumixic is distinctly and cleanly visible on ANY album art background:
+    val badgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0x66000000.toInt()
+        style = Paint.Style.FILL
+    }
+    val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0x33FFFFFF
+        style = Paint.Style.STROKE
+        strokeWidth = 2.5f
+    }
+    val badgeRect = RectF(brandLeft - 22f, 132f - 44f, brandRight + 16f, 132f + 16f)
+    canvas.drawRoundRect(badgeRect, 24f, 24f, badgePaint)
+    canvas.drawRoundRect(badgeRect, 24f, 24f, borderPaint)
+
+    // Draw Mumixic brand text & logo inside the badge
+    canvas.drawText("Mumixic", brandRight, 132f, brand)
+    drawLogo(canvas, context, logoRight, 132f)
+
+    // Ellipsize title so it NEVER collides with the brand badge
+    val maxTitleWidth = brandLeft - 44f - MARGIN
+    val titlePaint = type.heading(46f, 0xFFFFFFFF.toInt())
+    val fitTitle = ellipsised(title, titlePaint, maxTitleWidth)
+    canvas.drawText(fitTitle, MARGIN, 132f, titlePaint)
 
     val credit = listOfNotNull(
         holder.ifBlank { context.getString(R.string.default_replay_holder) },
@@ -585,11 +608,12 @@ private fun drawGenres(canvas: Canvas, context: Context, type: Fonts, summary: R
 }
 
 private fun drawFooter(canvas: Canvas, context: Context, type: Fonts) {
+    val footerText = "Mumixic REVERPLAY · " + context.getString(R.string.counted_on_device_with_bitchord)
     canvas.drawText(
-        context.getString(R.string.counted_on_device_with_bitchord),
+        footerText,
         MARGIN,
         POSTER_H - 64f,
-        type.label(24f, 0x73FFFFFF, tracking = 0.08f),
+        type.label(26f, 0xB3FFFFFF.toInt(), tracking = 0.05f),
     )
 }
 

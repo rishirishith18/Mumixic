@@ -403,9 +403,9 @@ private fun StoryChrome(
                 // by. A month or "All time" has no two-digit form and is spelt
                 // out rather than truncated into nonsense.
                 text = if (label.length == 4 && label.all { it.isDigit() }) {
-                    "Replay ${label.takeLast(2)}"
+                    "REVERPLAY ${label.takeLast(2)}"
                 } else {
-                    "Replay · $label"
+                    "REVERPLAY · $label"
                 },
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.W700,

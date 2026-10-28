@@ -749,7 +749,7 @@ var inviteTemplate = template.Must(template.New("invite").Parse(`<!DOCTYPE html>
             <a id="joinBtn" href="{{.IntentURI}}" class="btn">Join Party in Mumixic</a>
             <p class="footer-note">
                 Didn’t open automatically? Tap the button above.<br>
-                Don't have Mumixic yet? <a href="https://github.com/rishirishith18/Mumixic-Windows/releases" target="_blank" rel="noopener">Download it here</a>.
+                Don't have Mumixic yet? <a href="https://github.com/rishirishith18/Mumixic/releases" target="_blank" rel="noopener">Download it here</a>.
             </p>
             <script>
                 var intentUri = {{.IntentURI}};

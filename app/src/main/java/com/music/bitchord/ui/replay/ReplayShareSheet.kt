@@ -126,10 +126,10 @@ fun ReplayShareSheet(
         // nobody scrolls past, and the targets are the point of the sheet.
         Box(
             Modifier
-                .fillMaxWidth(0.42f)
+                .fillMaxWidth(0.48f)
                 .align(Alignment.CenterHorizontally)
                 .aspectRatio(9f / 16f)
-                .clip(RoundedCornerShape(18.dp))
+                .clip(RoundedCornerShape(10.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center,
         ) {

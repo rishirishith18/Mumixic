@@ -11,9 +11,9 @@
 
 <br/>
 
-[![Latest release](https://img.shields.io/github/v/release/rishirishith18/Mumixic-Windows?style=for-the-badge&labelColor=0d1117)](https://github.com/rishirishith18/Mumixic-Windows/releases)
-[![License](https://img.shields.io/github/license/rishirishith18/Mumixic-Windows?style=for-the-badge&labelColor=0d1117)](https://github.com/rishirishith18/Mumixic-Windows/blob/main/LICENSE)
-[![Downloads](https://img.shields.io/github/downloads/rishirishith18/Mumixic-Windows/total?style=for-the-badge&labelColor=0d1117)](https://github.com/rishirishith18/Mumixic-Windows/releases)
+[![Latest release](https://img.shields.io/github/v/release/rishirishith18/Mumixic?style=for-the-badge&labelColor=0d1117)](https://github.com/rishirishith18/Mumixic/releases)
+[![License](https://img.shields.io/github/license/rishirishith18/Mumixic?style=for-the-badge&labelColor=0d1117)](https://github.com/rishirishith18/Mumixic/blob/main/LICENSE)
+[![Downloads](https://img.shields.io/github/downloads/rishirishith18/Mumixic/total?style=for-the-badge&labelColor=0d1117)](https://github.com/rishirishith18/Mumixic/releases)
 
 <br/>
 
@@ -88,12 +88,9 @@
 
 <h1><a id="download"></a>Download</h1>
 
-<a href="https://github.com/rishirishith18/Mumixic-Windows/releases" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/supported/android/cozy.svg" alt="Download for Android" height="55"/></a>
-<a href="https://github.com/rishirishith18/Mumixic-Windows/releases" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/supported/windows/cozy.svg" alt="Download for Windows" height="55"/></a>
+<a href="https://github.com/rishirishith18/Mumixic/releases" target="_blank" rel="noopener noreferrer"><img src="https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/supported/android/cozy.svg" alt="Download for Android" height="55"/></a>
 
-Grab the latest signed packages from the [Releases](https://github.com/rishirishith18/Mumixic-Windows/releases) page.
-
-For the Windows and Linux desktop app, see [DESKTOP.md](DESKTOP.md).
+Grab the latest signed packages from the [Releases](https://github.com/rishirishith18/Mumixic/releases) page.
 
 </div>
 
@@ -109,8 +106,8 @@ We welcome contributions to Mumixic! Please review our [Contributing Guide](CONT
 
 ### Thanks to all contributors ❤
 
-<a href="https://github.com/rishirishith18/Mumixic-Windows/graphs/contributors">
-  <img src="https://raw.githubusercontent.com/rishirishith18/Mumixic-Windows/contributors/contributors.svg" />
+<a href="https://github.com/rishirishith18/Mumixic/graphs/contributors">
+  <img src="https://raw.githubusercontent.com/rishirishith18/Mumixic/contributors/contributors.svg" />
 </a>
 
 </div>

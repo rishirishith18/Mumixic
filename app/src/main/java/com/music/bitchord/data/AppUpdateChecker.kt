@@ -43,7 +43,7 @@ object AppUpdateChecker {
     private const val CACHE_SUBDIR = "updates"
 
     private const val LATEST_RELEASE_URL =
-        "https://api.github.com/repos/rishirishith18/Mumixic-Windows/releases/latest"
+        "https://api.github.com/repos/rishirishith18/Mumixic/releases/latest"
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -65,22 +65,31 @@ object AppUpdateChecker {
     @Volatile
     private var downloadCancelled = false
 
-    suspend fun check() = withContext(Dispatchers.IO) {
+    enum class CheckResultStatus {
+        UPDATE_AVAILABLE,
+        UP_TO_DATE,
+        FAILED,
+    }
+
+    suspend fun check(): CheckResultStatus = withContext(Dispatchers.IO) {
         runCatching {
             val request = Request.Builder().url(LATEST_RELEASE_URL).build()
             val body = Http.client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) null else response.body?.string()
-            } ?: return@runCatching
-            val release = json.parseToJsonElement(body) as? JsonObject ?: return@runCatching
-            val tag = release["tag_name"]?.jsonPrimitive?.contentOrNull ?: return@runCatching
-            val url = release["html_url"]?.jsonPrimitive?.contentOrNull ?: return@runCatching
+            } ?: return@runCatching CheckResultStatus.FAILED
+            val release = json.parseToJsonElement(body) as? JsonObject ?: return@runCatching CheckResultStatus.FAILED
+            val tag = release["tag_name"]?.jsonPrimitive?.contentOrNull ?: return@runCatching CheckResultStatus.FAILED
+            val url = release["html_url"]?.jsonPrimitive?.contentOrNull ?: return@runCatching CheckResultStatus.FAILED
             val apkUrl = apkAssetUrl(release)
             val notes = release["body"]?.jsonPrimitive?.contentOrNull
-            val latest = tag.removePrefix("v")
+            val latest = tag.removePrefix("v").removePrefix("V")
             if (isNewer(latest, BuildConfig.VERSION_NAME)) {
                 _available.value = UpdateInfo(latest, url, apkUrl, notes)
+                CheckResultStatus.UPDATE_AVAILABLE
+            } else {
+                CheckResultStatus.UP_TO_DATE
             }
-        }
+        }.getOrElse { CheckResultStatus.FAILED }
     }
 
     /**
@@ -114,7 +123,9 @@ object AppUpdateChecker {
             ?.mapNotNull { asset ->
                 val name = asset["name"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
                 val url = asset["browser_download_url"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
-                val ours = name.startsWith(BuildConfig.UPDATE_APK_PREFIX, ignoreCase = true) &&
+                val ours = (name.startsWith(BuildConfig.UPDATE_APK_PREFIX, ignoreCase = true) ||
+                    name.startsWith("Mumixic-", ignoreCase = true) ||
+                    name.startsWith("BitChord-", ignoreCase = true)) &&
                     name.endsWith(".apk", ignoreCase = true) &&
                     asset["state"]?.jsonPrimitive?.contentOrNull == "uploaded"
                 if (ours) name.removeSuffix(".apk").removeSuffix(".APK") to url else null
@@ -124,6 +135,7 @@ object AppUpdateChecker {
             ?: Build.SUPPORTED_ABIS.firstNotNullOfOrNull { abi ->
                 apks.firstOrNull { (name, _) -> name.endsWith("_$abi") }?.second
             }
+            ?: apks.firstOrNull()?.second
     }.getOrNull()
 
     /**

@@ -11,9 +11,11 @@ import android.media.MediaMetadataRetriever
 import android.media.audiofx.AudioEffect
 import android.net.Uri
 import android.widget.Toast
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.SystemClock
+import android.view.KeyEvent
 import com.music.bitchord.data.TelemetryProvenance
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -7631,7 +7633,12 @@ class PlaybackService : MediaLibraryService() {
                 castPrevious()
                 return
             }
-            super.seekToPrevious()
+            if (AppSettings.headphonePreviousSkipsTrack.value && wrappedPlayer.hasPreviousMediaItem()) {
+                crossfade.onSkipRequested()
+                wrappedPlayer.seekToPreviousMediaItem()
+            } else {
+                super.seekToPrevious()
+            }
         }
 
         override fun seekToDefaultPosition() {
@@ -7774,7 +7781,11 @@ class PlaybackService : MediaLibraryService() {
                 castPrevious()
                 return
             }
-            wrappedPlayer.seekToPrevious()
+            if (AppSettings.headphonePreviousSkipsTrack.value && wrappedPlayer.hasPreviousMediaItem()) {
+                wrappedPlayer.seekToPreviousMediaItem()
+            } else {
+                wrappedPlayer.seekToPrevious()
+            }
         }
 
         override fun seekToNextMediaItem() {
@@ -7832,6 +7843,32 @@ class PlaybackService : MediaLibraryService() {
 
         override fun onDisconnected(session: MediaSession, controller: MediaSession.ControllerInfo) {
             if (carControllers.remove(controller)) refreshCustomLayouts()
+        }
+
+        override fun onMediaButtonEvent(
+            session: MediaSession,
+            controller: MediaSession.ControllerInfo,
+            intent: Intent,
+        ): Boolean {
+            val keyEvent: KeyEvent? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT, KeyEvent::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT)
+            }
+            if (keyEvent != null && keyEvent.action == KeyEvent.ACTION_DOWN) {
+                if (keyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_PREVIOUS || keyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_REWIND) {
+                    if (AppSettings.headphonePreviousSkipsTrack.value) {
+                        val active = player ?: session.player
+                        if (active.hasPreviousMediaItem()) {
+                            crossfade?.onSkipRequested()
+                            active.seekToPreviousMediaItem()
+                            return true
+                        }
+                    }
+                }
+            }
+            return super.onMediaButtonEvent(session, controller, intent)
         }
 
         override fun onCustomCommand(

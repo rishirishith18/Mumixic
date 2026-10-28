@@ -2542,8 +2542,15 @@ private fun BitChordApp(
             .background(MaterialTheme.colorScheme.background),
     ) {
         customBackgroundUri?.let { imageUri ->
+            val bgModel = remember(imageUri) {
+                if (imageUri.startsWith("file://") || imageUri.startsWith("/")) {
+                    java.io.File(imageUri.removePrefix("file://"))
+                } else {
+                    android.net.Uri.parse(imageUri)
+                }
+            }
             AsyncImage(
-                model = imageUri,
+                model = bgModel,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -2945,6 +2952,23 @@ private fun BitChordApp(
                             onSpotifyCanvasAuth = { showSpotifyCanvasAuth = true },
                             onAppLanguage = { showAppLanguage = true },
                             onEditSignatureApi = { editingSignatureApi = true },
+                            onCheckForUpdates = {
+                                updateDismissed = false
+                                scope.launch {
+                                    Toast.makeText(context, "Checking for updates...", Toast.LENGTH_SHORT).show()
+                                    when (AppUpdateChecker.check()) {
+                                        AppUpdateChecker.CheckResultStatus.UPDATE_AVAILABLE -> {
+                                            // availableUpdate state triggers UpdateAvailableDialog
+                                        }
+                                        AppUpdateChecker.CheckResultStatus.UP_TO_DATE -> {
+                                            Toast.makeText(context, "You're on the latest version (v${BuildConfig.VERSION_NAME})", Toast.LENGTH_SHORT).show()
+                                        }
+                                        AppUpdateChecker.CheckResultStatus.FAILED -> {
+                                            Toast.makeText(context, "Could not check for updates. Check connection.", Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+                                }
+                            },
                             contentPadding = listPadding,
                         )
                     } else if (page != null) {

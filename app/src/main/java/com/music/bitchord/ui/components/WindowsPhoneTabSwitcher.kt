@@ -53,8 +53,8 @@ fun WindowsPhoneTabSwitcher(
                 Text(
                     text = tab.label.uppercase(),
                     style = MaterialTheme.typography.displaySmall.copy(
-                        fontSize = 28.sp,
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
+                        fontSize = 36.sp,
+                        fontWeight = if (selected) FontWeight.Black else FontWeight.ExtraBold,
                         letterSpacing = 0.5.sp,
                     ),
                     color = MaterialTheme.colorScheme.onBackground.copy(
@@ -66,9 +66,9 @@ fun WindowsPhoneTabSwitcher(
                 Spacer(Modifier.height(4.dp))
                 Box(
                     Modifier
-                        .width(if (selected) 36.dp else 0.dp)
-                        .height(3.dp)
-                        .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(1.5.dp)),
+                        .width(if (selected) 42.dp else 0.dp)
+                        .height(3.5.dp)
+                        .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp)),
                 )
             }
         }

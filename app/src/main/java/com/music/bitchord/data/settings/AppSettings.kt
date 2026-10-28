@@ -254,6 +254,12 @@ object AppSettings {
     val preferUsbDac = MutableStateFlow(false)
 
     /**
+     * Whether pressing previous on headphones, earphones or media controls (e.g. triple-tap)
+     * immediately skips to the previous track instead of restarting the current track.
+     */
+    val headphonePreviousSkipsTrack = MutableStateFlow(true)
+
+    /**
      * Level every track to the same loudness, using YouTube's own
      * normalization figure for it — see
      * [com.music.bitchord.playback.PlaybackService.setupLoudnessEnhancer].
@@ -380,7 +386,7 @@ object AppSettings {
     val onboardingComplete = MutableStateFlow(false)
 
     /** Requests a sustained high-refresh UI. Off keeps Android's automatic policy. */
-    val highPerformanceMode = MutableStateFlow(false)
+    val highPerformanceMode = MutableStateFlow(true)
 
     /** Preferred UI refresh rate while [highPerformanceMode] is enabled. */
     val performanceRefreshRate = MutableStateFlow(DEFAULT_PERFORMANCE_REFRESH_RATE)
@@ -848,6 +854,7 @@ object AppSettings {
             )
         }.getOrDefault(OutputPcmMode.PCM_16)
         preferUsbDac.value = prefs.getBoolean(KEY_PREFER_USB_DAC, false)
+        headphonePreviousSkipsTrack.value = prefs.getBoolean(KEY_HEADPHONE_PREVIOUS_SKIPS_TRACK, true)
         loudnessNormalization.value = prefs.getBoolean(KEY_LOUDNESS_NORMALIZATION, true)
         loudnessOffOnSpeaker.value = prefs.getBoolean(KEY_LOUDNESS_OFF_ON_SPEAKER, true)
         dolbyAtmos.value = prefs.getBoolean(KEY_DOLBY_ATMOS, true)
@@ -877,7 +884,7 @@ object AppSettings {
         showNerdStats.value = prefs.getBoolean(KEY_NERD_STATS, false)
         reduceAnimation.value = prefs.getBoolean(KEY_REDUCE_ANIMATION, false)
         onboardingComplete.value = prefs.getBoolean(KEY_ONBOARDING_COMPLETE, false)
-        highPerformanceMode.value = prefs.getBoolean(KEY_HIGH_PERFORMANCE_MODE, false)
+        highPerformanceMode.value = prefs.getBoolean(KEY_HIGH_PERFORMANCE_MODE, true)
         performanceRefreshRate.value = normalizePerformanceRefreshRate(
             prefs.getInt(KEY_PERFORMANCE_REFRESH_RATE, DEFAULT_PERFORMANCE_REFRESH_RATE),
         )
@@ -1149,6 +1156,11 @@ object AppSettings {
     fun setSkipSilence(value: Boolean) {
         skipSilence.value = value
         prefs.edit().putBoolean(KEY_SKIP_SILENCE, value).apply()
+    }
+
+    fun setHeadphonePreviousSkipsTrack(value: Boolean) {
+        headphonePreviousSkipsTrack.value = value
+        prefs.edit().putBoolean(KEY_HEADPHONE_PREVIOUS_SKIPS_TRACK, value).apply()
     }
 
     fun setDolbyAtmos(value: Boolean) {
@@ -2044,6 +2056,7 @@ object AppSettings {
     private const val KEY_SKIP_SILENCE = "skip_silence"
     private const val KEY_OUTPUT_PCM_MODE = "output_pcm_mode"
     private const val KEY_PREFER_USB_DAC = "prefer_usb_dac"
+    private const val KEY_HEADPHONE_PREVIOUS_SKIPS_TRACK = "headphone_previous_skips_track"
     private const val KEY_LOUDNESS_NORMALIZATION = "loudness_normalization"
     private const val KEY_LOUDNESS_OFF_ON_SPEAKER = "loudness_off_on_speaker"
     private const val KEY_DOLBY_ATMOS = "dolby_atmos"

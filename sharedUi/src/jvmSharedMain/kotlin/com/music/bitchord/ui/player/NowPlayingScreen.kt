@@ -1623,7 +1623,7 @@ fun NowPlayingScreen(
         movableContentOf<Modifier> { backdropModifier ->
             FullArtworkBlurBackdrop(
                 image = currentFullArtworkBlurImage.value,
-                fallback = currentArtworkTint.value.copy(alpha = 1f),
+                fallback = FallbackBackdrop,
                 modifier = backdropModifier,
             )
         }
@@ -2064,7 +2064,7 @@ fun NowPlayingScreen(
                     .fillMaxSize()
                     .onSizeChanged { playerBounds = it }
                     .then(dockHost)
-                    .background(artworkTint.copy(alpha = 1f)),
+                    .background(FallbackBackdrop),
             ) {
                 // Anchored to the sleeve's bottom edge, so the screen carries on in the
                 // colours the artwork ended in rather than in a quantiser's idea of what
@@ -2090,7 +2090,7 @@ fun NowPlayingScreen(
                     Modifier
                         .fillMaxSize()
                         .graphicsLayer { alpha = 1f - fullArtworkBackdropAlpha }
-                        .background(artworkTint.copy(alpha = 1f)),
+                        .background(FallbackBackdrop),
                 )
                 fullArtworkBlurContent(
                     Modifier.graphicsLayer { alpha = fullArtworkBackdropAlpha },

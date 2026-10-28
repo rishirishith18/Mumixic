@@ -101,10 +101,15 @@ fun rememberFullArtworkBlurImage(
     prepare: Boolean = true,
 ): ImageBitmap? {
     val context = LocalPlatformContext.current
-    var image by remember(imageUrl) { mutableStateOf(imageUrl?.let(fullBlurCache::get)) }
+    var image by remember { mutableStateOf(imageUrl?.let(fullBlurCache::get)) }
 
     LaunchedEffect(imageUrl, artPx, prepare) {
-        if (!prepare || imageUrl == null || image != null) return@LaunchedEffect
+        if (!prepare || imageUrl == null) return@LaunchedEffect
+        val cached = fullBlurCache[imageUrl]
+        if (cached != null) {
+            image = cached
+            return@LaunchedEffect
+        }
         val request = ImageRequest.Builder(context)
             // Same URL as the player's 1200px sleeve, so this is a small decode
             // from Coil's shared fetch/disk result rather than another download.
@@ -453,7 +458,7 @@ private fun DrawScope.drawMesh(mesh: ArtworkMesh, seamY: Float, alpha: Float) {
 }
 
 /** Drawn only until an artwork has been read — never a colour anyone chose. */
-private val FallbackBackdrop = Color(0xFF121212)
+val FallbackBackdrop = Color(0xFF121212)
 
 /** A screen cannot recover detail discarded here; small is the performance feature. */
 private const val FULL_BLUR_SOURCE_PX = 128

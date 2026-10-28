@@ -200,7 +200,7 @@
     <string name="spatial_audio_subtitle">Widens stereo tracks for a more immersive feel</string>
     <string name="spatial_audio_atmos_subtitle">Paused for this track — Dolby Atmos is already spatial</string>
     <string name="animated_cover_cellular">Play animated cover over cellular</string>
-    <string name="replay">Replay</string>
+    <string name="replay">REVERPLAY</string>
     <string name="replay_subtitle">Your top songs, artists, albums and genres</string>
     <string name="work_out_genres">Work out genres</string>
     <string name="export_data">Export data</string>
@@ -707,7 +707,7 @@
         <item quantity="other">%1$d minutes</item>
     </plurals>
     <string name="biggest_day_note">Your biggest day was %1$s with %2$s of listening.</string>
-    <string name="close_replay">Close Replay</string>
+    <string name="close_replay">Close REVERPLAY</string>
     <string name="couldnt_draw_picture">Could not create the picture</string>
     <string name="default_replay_holder">Mumixic listener</string>
     <string name="different_albums">Different albums</string>
@@ -730,8 +730,8 @@
     <string name="minutes_listened">Minutes listened</string>
     <string name="minutes_short">%1$d min</string>
     <string name="not_enough_listening">Not enough listening yet</string>
-    <string name="not_enough_this_month">Play a few more songs this month to unlock your Replay.</string>
-    <string name="not_enough_this_week">Play a few more songs this week to unlock your Replay.</string>
+    <string name="not_enough_this_month">Play a few more songs this month to unlock your REVERPLAY.</string>
+    <string name="not_enough_this_week">Play a few more songs this week to unlock your REVERPLAY.</string>
     <string name="pinned">Pinned</string>
     <string name="replay_across">Across </string>
     <string name="replay_album_end"> held your attention.</string>
@@ -741,7 +741,7 @@
     <string name="replay_artist_focus">One artist</string>
     <string name="replay_artist_start">All month, </string>
     <string name="replay_artist_start_week">This week, </string>
-    <string name="replay_empty_description">Listen a little more and Mumixic will turn your history into a Replay.</string>
+    <string name="replay_empty_description">Listen a little more and Mumixic will turn your history into a REVERPLAY.</string>
     <string name="replay_genre_end"> shaped your sound.</string>
     <string name="replay_genre_focus">Your genres</string>
     <string name="replay_genre_start">Together, </string>
@@ -768,9 +768,9 @@
     <string name="replay_summary_end_week">week</string>
     <string name="saved">Saved</string>
     <string name="saved_bang">Saved!</string>
-    <string name="share_my_replay">Share my Replay</string>
+    <string name="share_my_replay">Share my REVERPLAY</string>
     <string name="share_your_lyrics">Send your lyrics card</string>
-    <string name="share_your_replay">Share your Replay</string>
+    <string name="share_your_replay">Share your REVERPLAY</string>
     <string name="tap_share_for_picture">Tap Share to create a picture.</string>
     <string name="top_album">Top album</string>
     <string name="top_artist">Top artist</string>
@@ -780,7 +780,7 @@
     <string name="your_biggest_day">Your biggest day: %1$s</string>
     <string name="your_listening_experience">Your listening experience</string>
     <string name="your_lyrics_card">Your lyrics card</string>
-    <string name="your_replay">Your Replay</string>
+    <string name="your_replay">Your REVERPLAY</string>
     <plurals name="replay_artist_count">
         <item quantity="one">%1$s artist</item>
         <item quantity="other">%1$s artists</item>
@@ -862,7 +862,7 @@
     <string name="song_cache_large_subtitle">Keeps up to %1$s of downloaded audio on disk. This can take a noticeable share of your free space.</string>
     <string name="song_cache_limit_subtitle">Keeps downloaded audio on disk for instant seeking and replays</string>
     <string name="replay_genres_enabled_subtitle">Asks Last.fm for an artist’s genres. Only the artist name is sent.</string>
-    <string name="replay_genres_disabled_subtitle">The Replay genre chart stays hidden while this is off</string>
+    <string name="replay_genres_disabled_subtitle">The REVERPLAY genre chart stays hidden while this is off</string>
     <string name="swipe_plays_next">Swiping a song plays it next</string>
     <string name="swipe_adds_to_queue">When disabled, swiping adds the song to the end of the queue</string>
     <string name="import_backup_warning">This replaces this device’s settings and listening history with the contents of the file. Export the current data first if you want to keep it.</string>
@@ -879,7 +879,9 @@
         <item quantity="other">%1$d months of listening</item>
     </plurals>
     <string name="no_local_albums">Nothing here belongs to an album or playlist yet. Download a complete album or playlist and it will appear here.</string>
-    <string name="play_your_replay">Play your Replay</string>
+    <string name="play_your_replay">Play your REVERPLAY</string>
+    <string name="headphone_previous_skips_track">Headphone back button skips track</string>
+    <string name="headphone_previous_skips_track_subtitle">Triple-tap on earphones/headphones goes to the previous song instead of restarting</string>
     <string name="counted_on_device_with_bitchord">Counted on this device with Mumixic</string>
     <string name="this_month">This month</string>
     <string name="replay_this_week">This week</string>

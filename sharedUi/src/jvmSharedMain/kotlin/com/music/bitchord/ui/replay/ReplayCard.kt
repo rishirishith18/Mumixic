@@ -3,12 +3,14 @@ package com.music.bitchord.ui.replay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -64,107 +66,172 @@ fun ReplayCreditCard(
     Box(
         modifier = modifier
             .aspectRatio(CARD_RATIO)
-            .shadow(10.dp, CardShape, clip = false)
+            .shadow(16.dp, CardShape, clip = false)
             .clip(CardShape)
-            .border(1.dp, Color.White.copy(alpha = 0.22f), CardShape)
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    listOf(
+                        Color.White.copy(alpha = 0.38f),
+                        Color.White.copy(alpha = 0.10f),
+                        Color.White.copy(alpha = 0.24f),
+                    ),
+                ),
+                shape = CardShape,
+            )
             .clickable(onClick = onClick),
     ) {
         MeshGradientBackground(
             palette = palette,
             trackKey = artworkUrl ?: label,
-            blurRadius = 34.dp,
+            blurRadius = 36.dp,
             animated = false,
         )
-        // Keep the artwork colors vivid while maintaining clear text contrast.
+        // Top-left specular gloss reflection
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.16f),
+                            Color.Transparent,
+                        ),
+                        center = Offset(0f, 0f),
+                        radius = 450f,
+                    ),
+                ),
+        )
+        // Contrast gradient overlay
         Box(
             Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        0.0f to Color.Black.copy(alpha = 0.12f),
-                        0.52f to Color.Black.copy(alpha = 0.24f),
-                        1.0f to Color.Black.copy(alpha = 0.60f),
+                        0.0f to Color.Black.copy(alpha = 0.10f),
+                        0.48f to Color.Black.copy(alpha = 0.28f),
+                        1.0f to Color.Black.copy(alpha = 0.65f),
                     ),
                 ),
         )
 
-        Column(Modifier.fillMaxSize().padding(horizontal = 18.dp, vertical = 15.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp, vertical = 18.dp),
+        ) {
+            // Top branding & category row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(Res.string.your_listening_experience),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.W700,
-                        letterSpacing = 0.4.sp,
-                        color = Color.White.copy(alpha = 0.82f),
+                        text = stringResource(Res.string.your_listening_experience).uppercase(Locale.getDefault()),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 10.5.sp,
+                            fontWeight = FontWeight.W800,
+                            letterSpacing = 1.1.sp,
+                        ),
+                        color = Color.White.copy(alpha = 0.78f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     if (detail != null) {
+                        Spacer(Modifier.height(2.dp))
                         Text(
                             text = detail,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.White.copy(alpha = 0.62f),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.W600,
+                            ),
+                            color = Color.White.copy(alpha = 0.60f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
                 Spacer(Modifier.width(10.dp))
-                Icon(
-                    painter = painterResource(Res.drawable.ic_logo),
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(width = 30.dp, height = 22.dp),
-                )
+                // Logo mark in a sleek frosted glass container
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color.White.copy(alpha = 0.12f))
+                        .border(0.8.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(10.dp)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_logo),
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
             }
 
             Spacer(Modifier.weight(1f))
 
+            // Hero statistic: Apple Music style monumental display number
             Text(
                 text = value,
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontSize = 29.sp,
-                    lineHeight = 31.sp,
-                    fontWeight = FontWeight.W800,
+                style = MaterialTheme.typography.displaySmall.copy(
+                    fontSize = 35.sp,
+                    lineHeight = 37.sp,
+                    fontWeight = FontWeight.W900,
+                    letterSpacing = (-1.1).sp,
                 ),
                 color = Color.White,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+            Spacer(Modifier.height(2.dp))
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.W600,
-                color = Color.White.copy(alpha = 0.76f),
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontSize = 14.5.sp,
+                    fontWeight = FontWeight.W600,
+                    letterSpacing = (-0.2).sp,
+                ),
+                color = Color.White.copy(alpha = 0.85f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
 
-            Spacer(Modifier.weight(0.7f))
+            Spacer(Modifier.weight(0.9f))
 
+            // Frosted glass listener badge
             Row(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .clip(RoundedCornerShape(50))
-                    .background(Color.White.copy(alpha = 0.14f))
-                    .padding(horizontal = 11.dp, vertical = 7.dp),
+                    .background(Color.Black.copy(alpha = 0.28f))
+                    .border(0.8.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(50))
+                    .padding(horizontal = 13.dp, vertical = 7.dp),
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
                     text = holder.ifBlank { stringResource(Res.string.default_replay_holder) },
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.W700,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.W700,
+                        fontSize = 11.5.sp,
+                    ),
                     color = Color.White,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f, fill = false),
                 )
                 if (memberSince != null) {
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = "${stringResource(Res.string.member_since)} $memberSince",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.White.copy(alpha = 0.78f),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 10.5.sp,
+                        ),
+                        color = Color.White.copy(alpha = 0.65f),
                         maxLines = 1,
                     )
                 }
@@ -259,7 +326,7 @@ fun InitialTile(text: String, size: Dp, shape: Shape) {
     }
 }
 
-private val CardShape = RoundedCornerShape(20.dp)
+private val CardShape = RoundedCornerShape(26.dp)
 
 /** Whose card it is when there is no signed-in account to name. */
 

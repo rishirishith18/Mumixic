@@ -3,6 +3,7 @@ package com.music.bitchord.ui.replay
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
@@ -289,30 +290,57 @@ private fun PeriodPicker(selected: ReplayPeriod, onSelect: (ReplayPeriod) -> Uni
     val context = LocalContext.current
     val textColor = if (dark) Color.White else Color.Black
     Row(
-        Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(textColor.copy(alpha = 0.10f))
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(textColor.copy(alpha = if (dark) 0.12f else 0.08f))
+            .border(
+                width = 1.dp,
+                color = textColor.copy(alpha = if (dark) 0.10f else 0.06f),
+                shape = RoundedCornerShape(14.dp),
+            )
             .padding(3.dp),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         ReplayPeriod.entries.forEach { period ->
             val active = period == selected
             val background by animateColorAsState(
-                if (active) textColor.copy(alpha = 0.92f) else Color.Transparent,
-                tween(160),
+                if (active) {
+                    if (dark) Color.White else Color.Black
+                } else Color.Transparent,
+                tween(180),
                 label = "periodChip",
             )
-            Text(
-                text = period.localizedChip(context),
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.W700,
-                color = if (active) if (dark) Color.Black else Color.White else textColor.copy(alpha = 0.75f),
+            val contentColor by animateColorAsState(
+                if (active) {
+                    if (dark) Color.Black else Color.White
+                } else textColor.copy(alpha = 0.75f),
+                tween(180),
+                label = "periodContent",
+            )
+            Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
+                    .weight(1f)
+                    .clip(RoundedCornerShape(11.dp))
                     .background(background)
                     .clickable { onSelect(period) }
-                    .padding(horizontal = 14.dp, vertical = 8.dp),
-            )
+                    .padding(vertical = 8.dp, horizontal = 2.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = period.localizedChip(context),
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontSize = 12.sp,
+                        fontWeight = if (active) FontWeight.W800 else FontWeight.W600,
+                    ),
+                    color = contentColor,
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center,
+                )
+            }
         }
     }
 }
@@ -353,7 +381,7 @@ internal fun ReplayCardRow(
                 holder = holder,
                 memberSince = memberSince,
                 onClick = { onCardClick(card.page) },
-                modifier = Modifier.width(300.dp),
+                modifier = Modifier.width(312.dp),
             )
         }
     }
@@ -392,7 +420,12 @@ private fun ReplayActionRow(icon: ImageVector, label: String, dark: Boolean, onC
             .padding(horizontal = PAGE_GUTTER + 4.dp, vertical = 18.dp)
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(textColor.copy(alpha = 0.12f))
+            .background(textColor.copy(alpha = if (dark) 0.12f else 0.08f))
+            .border(
+                1.dp,
+                textColor.copy(alpha = if (dark) 0.10f else 0.06f),
+                RoundedCornerShape(14.dp),
+            )
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,

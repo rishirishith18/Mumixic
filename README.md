@@ -7,7 +7,7 @@
 
 # Mumixic
 
-### Aesthetic YouTube Music Client for Android
+### YouTube Music Client in Rich UI for Android
 
 <br/>
 

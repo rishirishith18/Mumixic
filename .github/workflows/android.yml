@@ -85,51 +85,55 @@ jobs:
           v="${{ steps.version.outputs.value }}"
           mkdir -p dist
 
-          # 1. Universal phone APK (preferred for OTA)
-          universal_apk=$(ls app/build/outputs/apk/prod/release/*universal*.apk 2>/dev/null | head -n 1)
-          if [ -f "$universal_apk" ]; then
-            cp "$universal_apk" "dist/Mumixic-$v.apk"
-          fi
-
-          # 2. ABI-specific split APKs
-          for abi in arm64-v8a armeabi-v7a x86_64; do
-            abi_apk=$(ls app/build/outputs/apk/prod/release/*"$abi"*.apk 2>/dev/null | head -n 1)
-            if [ -f "$abi_apk" ]; then
-              cp "$abi_apk" "dist/Mumixic-${v}_${abi}.apk"
+          find_and_copy() {
+            local search_dir="$1"
+            local pattern="$2"
+            local target_name="$3"
+            if [ -d "$search_dir" ]; then
+              local match
+              match=$(find "$search_dir" -maxdepth 1 -name "$pattern" 2>/dev/null | head -n 1)
+              if [ -n "$match" ] && [ -f "$match" ]; then
+                cp "$match" "dist/$target_name"
+                echo "Copied $match -> dist/$target_name"
+              fi
             fi
+          }
+
+          # 1. Phone universal APK
+          find_and_copy "app/build/outputs/apk/prod/release" "*universal*.apk" "Mumixic-v$v.apk"
+          find_and_copy "app/build/outputs/apk/prod/release" "*universal*.apk" "Mumixic-$v.apk"
+
+          # 2. Phone ABI split APKs
+          for abi in arm64-v8a armeabi-v7a x86_64; do
+            find_and_copy "app/build/outputs/apk/prod/release" "*$abi*.apk" "Mumixic-v${v}_${abi}.apk"
+            find_and_copy "app/build/outputs/apk/prod/release" "*$abi*.apk" "Mumixic-${v}_${abi}.apk"
           done
 
-          # 3. Fallback single APK if no universal name matched
-          if [ ! -f "dist/Mumixic-$v.apk" ]; then
-            single_apk=$(ls app/build/outputs/apk/prod/release/*.apk 2>/dev/null | head -n 1)
-            if [ -f "$single_apk" ]; then
-              cp "$single_apk" "dist/Mumixic-$v.apk"
-            fi
+          # Fallback if no universal was matched
+          if [ ! -f "dist/Mumixic-v$v.apk" ]; then
+            find_and_copy "app/build/outputs/apk/prod/release" "*.apk" "Mumixic-v$v.apk"
+            find_and_copy "app/build/outputs/apk/prod/release" "*.apk" "Mumixic-$v.apk"
           fi
 
-          # 4. TV APKs
-          tv_universal_apk=$(ls tv/build/outputs/apk/prod/release/*universal*.apk 2>/dev/null | head -n 1)
-          if [ -f "$tv_universal_apk" ]; then
-            cp "$tv_universal_apk" "dist/MumixicTV-$v.apk"
-          fi
+          # 3. TV universal APK
+          find_and_copy "tv/build/outputs/apk/prod/release" "*universal*.apk" "MumixicTV-v$v.apk"
+          find_and_copy "tv/build/outputs/apk/prod/release" "*universal*.apk" "MumixicTV-$v.apk"
+
+          # 4. TV ABI split APKs
           for abi in arm64-v8a armeabi-v7a x86_64; do
-            tv_abi_apk=$(ls tv/build/outputs/apk/prod/release/*"$abi"*.apk 2>/dev/null | head -n 1)
-            if [ -f "$tv_abi_apk" ]; then
-              cp "$tv_abi_apk" "dist/MumixicTV-${v}_${abi}.apk"
-            fi
+            find_and_copy "tv/build/outputs/apk/prod/release" "*$abi*.apk" "MumixicTV-v${v}_${abi}.apk"
+            find_and_copy "tv/build/outputs/apk/prod/release" "*$abi*.apk" "MumixicTV-${v}_${abi}.apk"
           done
-          if [ ! -f "dist/MumixicTV-$v.apk" ]; then
-            single_tv=$(ls tv/build/outputs/apk/prod/release/*.apk 2>/dev/null | head -n 1)
-            if [ -f "$single_tv" ]; then
-              cp "$single_tv" "dist/MumixicTV-$v.apk"
-            fi
+
+          # Fallback if no TV universal was matched
+          if [ ! -f "dist/MumixicTV-v$v.apk" ]; then
+            find_and_copy "tv/build/outputs/apk/prod/release" "*.apk" "MumixicTV-v$v.apk"
+            find_and_copy "tv/build/outputs/apk/prod/release" "*.apk" "MumixicTV-$v.apk"
           fi
 
-          # 5. Wear OS APK
-          wear_apk=$(ls wearos/build/outputs/apk/prod/release/*.apk 2>/dev/null | head -n 1)
-          if [ -f "$wear_apk" ]; then
-            cp "$wear_apk" "dist/Mumixic-WearOS-$v.apk"
-          fi
+          # 5. Wear OS APK (if available)
+          find_and_copy "wearos/build/outputs/apk/prod/release" "*.apk" "Mumixic-WearOS-v$v.apk"
+          find_and_copy "wearos/build/outputs/apk/prod/release" "*.apk" "Mumixic-WearOS-$v.apk"
 
           echo "Collected APKs for OTA release:"
           ls -lh dist/
@@ -149,5 +153,29 @@ jobs:
           draft: false
           prerelease: false
           files: dist/*
+          body: |
+            ## What's New in Mumixic v${{ steps.version.outputs.value }}
+
+            ### 🔍 Liquid Glass Navigation & Search Polish
+            - **In-Place Expandable Search Bar**: Tapping the search button in Liquid Glass mode expands smoothly into a floating glass search bar without navigating away from the current view.
+            - **Soft Keyboard Alignment**: Configured `adjustResize` and reactive `glassBarInsets` so the floating search bar sits gracefully above the soft keyboard without clipping.
+            - **Seamless Dismissal**: System back gestures and the search close button cleanly collapse search back to the navigation bar.
+
+            ### 🎨 Settings & Branding Polish
+            - **Quick Appearance Access**: Moved the **Liquid Glass** toggle directly into the main **Settings** page under **Appearance**.
+            - **Emblem Branding**: Positioned the clean Mumixic mark icon at the top-left opposite the profile avatar (clean emblem, no text).
+            - **Streamlined Pivot Headers**: Cleaned up the header layout by removing redundant page titles above Windows Phone pivot tabs.
+
+            ### ✨ Micro-Interactions & Liquid Motion
+            - **Play/Pause Morph**: Fluid SVG path morphing between the Play triangle and Pause bars with natural spring bounce physics.
+            - **3D Parallax Tilt**: Album artwork dynamically tilts in 3D perspective (`rotationY`, `rotationZ`, and perspective `cameraDistance`) in response to horizontal gestures and swipes.
+            - **Heart / Favorite Burst**: Tapping favorite triggers a tactile bounce accompanied by a 12-particle colorful radial spark explosion.
+
+            ### 🎵 Audio Quality Typography
+            - Replaced bulky pill badges with a clean, unobtrusive typographic indicator directly below artist credits (`Hi-Res Lossless`, `Lossless`, `High Quality · 320 kbps`).
+
+            ### 📺 TV & Platform Optimizations
+            - Synchronized versioning across phone (`1.8.1`), TV (`1.8.1`), and CI builds.
+            - Automated TV APK artifact packaging (`MumixicTV-1.8.1.apk` and ABI splits) for seamless in-app OTA updates.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

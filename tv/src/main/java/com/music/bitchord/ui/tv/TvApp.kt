@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.media3.session.MediaController
 import com.music.bitchord.R
+import com.music.bitchord.data.AppUpdateChecker
 import com.music.bitchord.data.model.BrowseType
 import com.music.bitchord.data.settings.TvSettings
 import com.music.bitchord.playback.PlayerState
@@ -170,7 +171,7 @@ fun TvApp(
 
     // Offered once per launch, and not over first-time setup. Settings'
     // "Software Update" row reopens it after it is dismissed.
-    val update by viewModel.updateAvailable.collectAsState()
+    val update by AppUpdateChecker.available.collectAsState()
     var updateDismissed by remember { mutableStateOf(false) }
 
     val spatialAudio by TvSettings.spatialAudioEnabled.collectAsState()

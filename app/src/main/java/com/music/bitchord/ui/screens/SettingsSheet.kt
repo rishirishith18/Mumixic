@@ -740,6 +740,33 @@ fun SettingsScreen(
                         onClick = { showFontDialog = true },
                     )
                 }
+                val liquidGlassTitle = stringResource(R.string.liquid_glass)
+                row(liquidGlassTitle, "glass", "blur") {
+                    SettingsRow(
+                        icon = Icons.Rounded.AutoAwesome,
+                        title = liquidGlassTitle,
+                        subtitle = stringResource(
+                            if (liquidGlassSupported) {
+                                R.string.liquid_glass_subtitle
+                            } else {
+                                R.string.liquid_glass_unavailable
+                            },
+                        ),
+                        enabled = liquidGlassSupported,
+                        trailing = {
+                            Switch(
+                                checked = liquidGlass,
+                                onCheckedChange = AppSettings::setLiquidGlass,
+                                enabled = liquidGlassSupported,
+                                colors = SwitchDefaults.colors(
+                                    checkedTrackColor = MaterialTheme.colorScheme.primary,
+                                    checkedBorderColor = MaterialTheme.colorScheme.primary,
+                                ),
+                            )
+                        },
+                        onClick = { AppSettings.setLiquidGlass(!liquidGlass) },
+                    )
+                }
                 val syncedLyricsTitle = stringResource(R.string.synced_lyrics)
                 row(syncedLyricsTitle, "lyrics", "translation", "lrclib", "musixmatch") {
                     SettingsRow(
@@ -963,33 +990,6 @@ fun SettingsScreen(
             }
 
             SearchableSettingsGroup(search, header = "Interface & animations") {
-                val liquidGlassTitle = stringResource(R.string.liquid_glass)
-                row(liquidGlassTitle, "glass", "blur") {
-                    SettingsRow(
-                        icon = Icons.Rounded.AutoAwesome,
-                        title = liquidGlassTitle,
-                        subtitle = stringResource(
-                            if (liquidGlassSupported) {
-                                R.string.liquid_glass_subtitle
-                            } else {
-                                R.string.liquid_glass_unavailable
-                            },
-                        ),
-                        enabled = liquidGlassSupported,
-                        trailing = {
-                            Switch(
-                                checked = liquidGlass,
-                                onCheckedChange = AppSettings::setLiquidGlass,
-                                enabled = liquidGlassSupported,
-                                colors = SwitchDefaults.colors(
-                                    checkedTrackColor = MaterialTheme.colorScheme.primary,
-                                    checkedBorderColor = MaterialTheme.colorScheme.primary,
-                                ),
-                            )
-                        },
-                        onClick = { AppSettings.setLiquidGlass(!liquidGlass) },
-                    )
-                }
                 val reduceAnimationTitle = stringResource(R.string.reduce_animation)
                 row(reduceAnimationTitle, "motion") {
                     SettingsRow(

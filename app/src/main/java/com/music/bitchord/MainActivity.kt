@@ -42,6 +42,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -2231,9 +2233,10 @@ private fun BitChordApp(
         !showListenTogether && !showWearOs && !showEqualizer && !showReplay && !showDiscord &&
         !showHistory && !showSpotify
     val pivotTabsHeight = if (windowsPhoneTabsVisible) 86.dp else 0.dp
+    val imeBottom = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
     val listPadding = PaddingValues(
         top = topBarContentPadding() + pivotTabsHeight,
-        bottom = if (player.song != null) 210.dp else 140.dp,
+        bottom = (if (player.song != null) 210.dp else 140.dp) + imeBottom,
     )
 
     // What colour the page currently under the bars is. The fades either end
@@ -2690,6 +2693,13 @@ private fun BitChordApp(
         // straight to Library. See [onLibraryItemClick].
         BackHandler(enabled = libraryShowAll != null && detail == null) { libraryShowAll = null }
         BackHandler(enabled = detailActiveShelf != null) { detailActiveShelf = null }
+        BackHandler(enabled = glassActive && selectedTab == TAB_SEARCH && detail == null) {
+            if (query.isNotEmpty()) {
+                viewModel.onQueryChange("")
+            } else {
+                selectedTab = TAB_HOME
+            }
+        }
 
         // On a tablet the page and the player stand side by side rather than
         // one over the other: everything a phone stacks in a single column —
@@ -3208,7 +3218,7 @@ private fun BitChordApp(
                             currentSong = player.song,
                             isPlaying = player.isPlaying,
                             hasCustomBackground = customBackgroundUri != null,
-                            title = stringResource(R.string.listen_now),
+                            title = if (windowsPhoneTabsVisible) null else stringResource(R.string.listen_now),
                             signedIn = signedIn,
                             onSignIn = { webSession = WebSessionMode.SIGN_IN },
                             onItemClick = { item, shelfTitle ->
@@ -3294,7 +3304,7 @@ private fun BitChordApp(
                             onLoadMore = viewModel::loadMoreSearchResults,
                             listState = searchListState,
                             scrollResetTrigger = searchScrollReset,
-                            focusRequested = searchFocusRequested,
+                            focusRequested = searchFocusRequested && !glassActive,
                             onFocusHandled = { searchFocusRequested = false },
                             // Search hits are alternatives to each other, not a running
                             // order — play the one tapped and build a station from it.
@@ -3751,7 +3761,7 @@ private fun BitChordApp(
                     modifier = Modifier.align(Alignment.TopCenter),
                     // Only on the Search tab itself, not on anything pushed over it.
                     accessory = if (
-                        selectedTab == TAB_SEARCH && detail == null && selectedMoodGenre == null &&
+                        !glassActive && selectedTab == TAB_SEARCH && detail == null && selectedMoodGenre == null &&
                         libraryShowAll == null && !showSettings && !showAccountScrobbling &&
                         !showSources && !showListenTogether && !showWearOs && !showEqualizer && !showDiscord &&
                         !showHistory && !showReplay
@@ -4045,7 +4055,8 @@ private fun BitChordApp(
                         modifier = Modifier
                             .align(Alignment.TopCenter)
                             .padding(top = topBarContentPadding())
-                            .height(pivotTabsHeight),
+                            .fillMaxWidth()
+                            .height(86.dp),
                     )
                 }
 
@@ -4083,6 +4094,22 @@ private fun BitChordApp(
                         onBlockedControl = showHostOnlyNotice,
                         dock = activeDock,
                         pull = playerSheetMotion.takeIf { !reducePlayerMotion },
+                        searchQuery = query,
+                        onSearchQueryChange = viewModel::onQueryChange,
+                        onSearchSubmit = viewModel::submitSearch,
+                        searchFocusRequester = searchFieldFocus,
+                        searchPlaceholder = org.jetbrains.compose.resources.stringResource(
+                            if (searchSource == SearchSource.LIBRARY) {
+                                SharedRes.string.search_library_hint
+                            } else if (searchSource == SearchSource.ADDONS) {
+                                SharedRes.string.search_addons_hint
+                            } else {
+                                SharedRes.string.search_hint
+                            },
+                        ),
+                        onCloseSearch = {
+                            selectedTab = TAB_HOME
+                        },
                         modifier = Modifier.fillMaxWidth(),
                     )
                 } else Column(

@@ -60,6 +60,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -313,6 +314,30 @@ fun FrostedTopBar(
                             tint = MaterialTheme.colorScheme.onSurface,
                         )
                     }
+                }
+            } else if (accessory == null) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(start = if (useFloatingChrome) BAR_GUTTER else 4.dp)
+                        .size(44.dp)
+                        .then(
+                            if (useFloatingChrome) {
+                                artworkPageSurface(shape = CircleShape, hazeState = backButtonHazeState)
+                            } else Modifier,
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_mumixic_mark),
+                        contentDescription = "Mumixic",
+                        tint = if (useFloatingChrome && LocalLiquidGlassEnabled.current && isGlassSupported() && !reduceDynamicBlur) {
+                            glassContentColor()
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        },
+                        modifier = Modifier.size(26.dp),
+                    )
                 }
             }
             // No wordmark at the leading end: the root tabs carry it above

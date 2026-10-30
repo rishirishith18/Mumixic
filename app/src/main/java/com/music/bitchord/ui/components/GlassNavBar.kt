@@ -24,30 +24,48 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -102,6 +120,12 @@ fun GlassNavBar(
     /** Dragging the bar's player up into the full player. */
     pull: MiniPlayerPull? = null,
     modifier: Modifier = Modifier,
+    searchQuery: String = "",
+    onSearchQueryChange: (String) -> Unit = {},
+    onSearchSubmit: () -> Unit = {},
+    searchFocusRequester: FocusRequester? = null,
+    searchPlaceholder: String = "",
+    onCloseSearch: () -> Unit = {},
 ) {
     // Held for the same reason [tabs] is. The glass factory below closes over
     // this shape, and a fresh RoundedCornerShape each pass means a fresh factory
@@ -118,11 +142,20 @@ fun GlassNavBar(
     // Held through a state that is always current instead, which also keeps the
     // handler out of the key.
     val currentOnTabSelected by rememberUpdatedState(onTabSelected)
+    val currentSearchQuery by rememberUpdatedState(searchQuery)
+    val currentOnSearchQueryChange by rememberUpdatedState(onSearchQueryChange)
+    val currentOnSearchSubmit by rememberUpdatedState(onSearchSubmit)
+    val currentSearchPlaceholder by rememberUpdatedState(searchPlaceholder)
+    val currentOnCloseSearch by rememberUpdatedState(onCloseSearch)
 
     // Search is the odd one out in the iOS 26 layout: a circle of its own beside
     // the pill rather than a quarter of it. It is the last tab in BitChord's
     // order, which is where the shape wants it anyway.
     val standaloneIndex = tabs.lastIndex
+
+    val nav = WindowInsets.navigationBars.union(WindowInsets(bottom = 15.dp))
+    val ime = WindowInsets.ime
+    val glassBarInsets = WindowInsets(bottom = 6.dp).add(ime).union(nav)
 
     // A factory, not a value — see the note in FloatingTabBar's header. Each of
     // the three surfaces gets its own glass modifier and so its own shape cache.
@@ -132,7 +165,7 @@ fun GlassNavBar(
         selectedTabKey = selectedIndex,
         scrollConnection = scrollConnection,
         modifier = modifier
-            .windowInsetsPadding(floatingBarInsets)
+            .windowInsetsPadding(glassBarInsets)
             .padding(horizontal = BAR_GUTTER)
             .padding(bottom = 2.dp)
             .fillMaxWidth(),
@@ -229,6 +262,17 @@ fun GlassNavBar(
                         )
                     },
                     onClick = onClick,
+                    expandedContent = {
+                        GlassSearchBar(
+                            query = currentSearchQuery,
+                            onQueryChange = currentOnSearchQueryChange,
+                            onSubmit = currentOnSearchSubmit,
+                            placeholder = currentSearchPlaceholder,
+                            contentColor = contentColor,
+                            focusRequester = searchFocusRequester ?: remember { FocusRequester() },
+                            onClose = currentOnCloseSearch,
+                        )
+                    },
                 )
             } else {
                 tab(
@@ -245,6 +289,102 @@ fun GlassNavBar(
                     onClick = onClick,
                 )
             }
+        }
+    }
+}
+
+/**
+ * The liquid glass search bar: expanded in-place from the standalone search tab.
+ */
+@Composable
+private fun GlassSearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    placeholder: String,
+    contentColor: Color,
+    focusRequester: FocusRequester,
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+        keyboardController?.show()
+    }
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(61.dp)
+            .padding(horizontal = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Rounded.Search,
+            contentDescription = stringResource(R.string.search),
+            tint = contentColor,
+            modifier = Modifier
+                .size(24.dp)
+                .clickable(enabled = query.isNotBlank()) {
+                    onSubmit()
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                },
+        )
+        Spacer(Modifier.width(8.dp))
+        Box(
+            modifier = Modifier.weight(1f),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            if (query.isEmpty()) {
+                Text(
+                    text = placeholder,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = contentColor.copy(alpha = 0.55f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            BasicTextField(
+                value = query,
+                onValueChange = onQueryChange,
+                singleLine = true,
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = contentColor),
+                cursorBrush = SolidColor(contentColor),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = {
+                    onSubmit()
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                }),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester),
+            )
+        }
+        IconButton(
+            onClick = {
+                if (query.isNotEmpty()) {
+                    onQueryChange("")
+                    focusRequester.requestFocus()
+                    keyboardController?.show()
+                } else {
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                    onClose()
+                }
+            },
+            modifier = Modifier.size(32.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Close,
+                contentDescription = stringResource(if (query.isNotEmpty()) R.string.clear_search else R.string.close_search),
+                tint = contentColor.copy(alpha = 0.75f),
+                modifier = Modifier.size(20.dp),
+            )
         }
     }
 }

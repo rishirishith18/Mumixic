@@ -33,6 +33,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -74,7 +75,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import androidx.compose.ui.Alignment
@@ -85,6 +88,8 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -478,13 +483,12 @@ internal fun TransportRow(
                 )
             }
         } else {
-            TransportGlyph(
-                icon = if (isPlaying) Res.drawable.ic_player_pause else Res.drawable.ic_player_play,
-                contentDescription = stringResource(if (isPlaying) Res.string.pause else Res.string.play),
+            MorphingPlayPauseButton(
+                isPlaying = isPlaying,
+                onClick = onPlayPause,
                 size = playSize,
                 touchSize = playTouch,
-                onClick = onPlayPause,
-                haptic = if (isPlaying) Haptic.Pause else Haptic.Resume,
+                contentDescription = stringResource(if (isPlaying) Res.string.pause else Res.string.play),
             )
         }
         TransportGlyph(
@@ -742,6 +746,283 @@ internal fun CircleGlyph(
                 modifier = Modifier.size(19.dp),
             )
         }
+    }
+}
+
+/**
+ * Fluid morphing Play/Pause control with spring bounce physics.
+ * Morphs seamlessly between a rounded Play triangle and dual rounded Pause bars.
+ */
+@Composable
+internal fun MorphingPlayPauseButton(
+    isPlaying: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    size: Dp = 74.dp,
+    touchSize: Dp = 92.dp,
+    tint: Color = Color.White,
+    contentDescription: String = "",
+) {
+    val haptics = rememberHaptics()
+    val scope = rememberCoroutineScope()
+    val bounceScale = remember { Animatable(1f) }
+
+    // Spring-driven morph progress (0f = Play, 1f = Pause)
+    val morphProgress by animateFloatAsState(
+        targetValue = if (isPlaying) 1f else 0f,
+        animationSpec = spring(
+            dampingRatio = 0.64f,
+            stiffness = Spring.StiffnessMediumLow,
+        ),
+        label = "playPauseMorph",
+    )
+
+    // Subtle organic rotation during morph
+    val rotation by animateFloatAsState(
+        targetValue = if (isPlaying) 0f else -10f,
+        animationSpec = spring(dampingRatio = 0.68f, stiffness = Spring.StiffnessMediumLow),
+        label = "playPauseRotation",
+    )
+
+    Box(
+        modifier = modifier
+            .size(touchSize)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+            ) {
+                haptics.play(if (isPlaying) Haptic.Pause else Haptic.Resume)
+                scope.launch {
+                    bounceScale.snapTo(0.82f)
+                    bounceScale.animateTo(
+                        targetValue = 1f,
+                        animationSpec = spring(
+                            dampingRatio = 0.52f,
+                            stiffness = Spring.StiffnessMediumLow,
+                        ),
+                    )
+                }
+                onClick()
+            }
+            .semantics { this.contentDescription = contentDescription },
+        contentAlignment = Alignment.Center,
+    ) {
+        Canvas(
+            modifier = Modifier
+                .size(size)
+                .graphicsLayer {
+                    scaleX = bounceScale.value
+                    scaleY = bounceScale.value
+                    rotationZ = rotation
+                },
+        ) {
+            val glyphSize = minOf(this.size.width, this.size.height) * 0.52f
+            val cx = this.size.width / 2f
+            val cy = this.size.height / 2f
+
+            val p = morphProgress.coerceIn(0f, 1f)
+
+            // PAUSE geometry: two vertical rounded bars
+            val barW = glyphSize * 0.28f
+            val barH = glyphSize * 0.90f
+            val gap = glyphSize * 0.32f
+
+            val pauseLeftL = cx - gap / 2f - barW
+            val pauseLeftR = cx - gap / 2f
+            val pauseRightL = cx + gap / 2f
+            val pauseRightR = cx + gap / 2f + barW
+            val pauseTop = cy - barH / 2f
+            val pauseBottom = cy + barH / 2f
+
+            // PLAY geometry: unified triangle pointing right
+            val triW = glyphSize * 0.88f
+            val triH = glyphSize * 0.95f
+            val playLeft = cx - triW * 0.44f
+            val playApex = cx + triW * 0.56f
+            val playMid = (playLeft + playApex) / 2f
+            val playTop = cy - triH / 2f
+            val playBottom = cy + triH / 2f
+            val playMidTop = cy - triH * 0.26f
+            val playMidBottom = cy + triH * 0.26f
+
+            val cornerRadius = glyphSize * 0.08f * p + glyphSize * 0.09f * (1f - p)
+
+            // Interpolated Left Bar vertices
+            val lTL = Offset(playLeft + (pauseLeftL - playLeft) * p, playTop + (pauseTop - playTop) * p)
+            val lTR = Offset(playMid + (pauseLeftR - playMid) * p, playMidTop + (pauseTop - playMidTop) * p)
+            val lBR = Offset(playMid + (pauseLeftR - playMid) * p, playMidBottom + (pauseBottom - playMidBottom) * p)
+            val lBL = Offset(playLeft + (pauseLeftL - playLeft) * p, playBottom + (pauseBottom - playBottom) * p)
+
+            // Interpolated Right Bar vertices
+            val rTL = Offset(playMid + (pauseRightL - playMid) * p, playMidTop + (pauseTop - playMidTop) * p)
+            val rTR = Offset(playApex + (pauseRightR - playApex) * p, cy + (pauseTop - cy) * p)
+            val rBR = Offset(playApex + (pauseRightR - playApex) * p, cy + (pauseBottom - cy) * p)
+            val rBL = Offset(playMid + (pauseRightL - playMid) * p, playMidBottom + (pauseBottom - playMidBottom) * p)
+
+            fun DrawScope.drawRoundedPolygon(v0: Offset, v1: Offset, v2: Offset, v3: Offset, r: Float) {
+                val path = Path()
+                val pts = listOf(v0, v1, v2, v3)
+                for (i in 0..3) {
+                    val prev = pts[(i + 3) % 4]
+                    val curr = pts[i]
+                    val next = pts[(i + 1) % 4]
+
+                    val vPrev = prev - curr
+                    val vNext = next - curr
+                    val dPrev = vPrev.getDistance()
+                    val dNext = vNext.getDistance()
+
+                    val clampedR = minOf(r, dPrev * 0.45f, dNext * 0.45f)
+                    if (clampedR <= 0.5f || dPrev < 1f || dNext < 1f) {
+                        if (i == 0) path.moveTo(curr.x, curr.y) else path.lineTo(curr.x, curr.y)
+                    } else {
+                        val pStart = curr + (vPrev / dPrev) * clampedR
+                        val pEnd = curr + (vNext / dNext) * clampedR
+                        if (i == 0) {
+                            path.moveTo(pStart.x, pStart.y)
+                        } else {
+                            path.lineTo(pStart.x, pStart.y)
+                        }
+                        path.quadraticTo(curr.x, curr.y, pEnd.x, pEnd.y)
+                    }
+                }
+                path.close()
+                drawPath(path, color = tint)
+            }
+
+            drawRoundedPolygon(lTL, lTR, lBR, lBL, cornerRadius)
+            drawRoundedPolygon(rTL, rTR, rBR, rBL, cornerRadius)
+        }
+    }
+}
+
+/**
+ * Heart Favorite button with tactile bounce and colorful particle explosion.
+ */
+@Composable
+internal fun FavoriteHeartButton(
+    liked: Boolean,
+    onToggleLike: () -> Unit,
+    modifier: Modifier = Modifier,
+    tint: Color = LocalPlayerTint.current,
+) {
+    val haptics = rememberHaptics()
+    val scope = rememberCoroutineScope()
+    val heartScale = remember { Animatable(1f) }
+    val burstProgress = remember { Animatable(0f) }
+
+    LaunchedEffect(liked) {
+        if (liked) {
+            launch {
+                heartScale.snapTo(0.72f)
+                heartScale.animateTo(
+                    targetValue = 1.35f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMediumLow,
+                    ),
+                )
+                heartScale.animateTo(
+                    targetValue = 1f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMedium,
+                    ),
+                )
+            }
+            launch {
+                burstProgress.snapTo(0f)
+                burstProgress.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(durationMillis = 520, easing = FastOutSlowInEasing),
+                )
+            }
+        }
+    }
+
+    val discAlpha by animateFloatAsState(
+        targetValue = if (liked) 0.34f else 0.18f,
+        label = "heartDisc",
+    )
+
+    Box(
+        modifier = modifier
+            .size(34.dp)
+            .clip(CircleShape)
+            .background(tint.copy(alpha = discAlpha))
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+            ) {
+                haptics.play(if (liked) Haptic.ToggleOff else Haptic.ToggleOn)
+                onToggleLike()
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        if (burstProgress.value > 0f && burstProgress.value < 1f) {
+            val progress = burstProgress.value
+            Canvas(
+                modifier = Modifier
+                    .size(80.dp)
+                    .graphicsLayer { clip = false },
+            ) {
+                val cx = size.width / 2f
+                val cy = size.height / 2f
+                val particleCount = 12
+                val minR = 14.dp.toPx()
+                val maxR = 36.dp.toPx()
+                val currentR = minR + (maxR - minR) * progress
+
+                val colors = listOf(
+                    Color(0xFFFF2D55), // Hot Pink
+                    Color(0xFFFF375F), // Crimson Heart
+                    Color(0xFFFF9F0A), // Warm Amber
+                    Color(0xFFAF52DE), // Royal Violet
+                    Color(0xFFFFD60A), // Neon Gold
+                    Color(0xFF32ADE6), // Electric Cyan
+                )
+
+                for (i in 0 until particleCount) {
+                    val angle = (i * (2f * Math.PI / particleCount) + (i % 3) * 0.15f).toFloat()
+                    val px = cx + kotlin.math.cos(angle) * currentR
+                    val py = cy + kotlin.math.sin(angle) * currentR
+                    val pColor = colors[i % colors.size]
+
+                    val pSize = (3.5.dp.toPx() * kotlin.math.sin(progress * Math.PI.toFloat())).coerceAtLeast(0f)
+                    val pAlpha = (1f - progress).coerceIn(0f, 1f)
+
+                    if (i % 2 == 0) {
+                        drawCircle(
+                            color = pColor.copy(alpha = pAlpha),
+                            radius = pSize,
+                            center = Offset(px, py),
+                        )
+                    } else {
+                        val half = pSize * 1.2f
+                        val diamond = Path().apply {
+                            moveTo(px, py - half)
+                            lineTo(px + half, py)
+                            lineTo(px, py + half)
+                            lineTo(px - half, py)
+                            close()
+                        }
+                        drawPath(diamond, color = pColor.copy(alpha = pAlpha))
+                    }
+                }
+            }
+        }
+
+        Icon(
+            imageVector = if (liked) BitChordIcons.HeartFilled else BitChordIcons.Heart,
+            contentDescription = stringResource(if (liked) Res.string.remove_from_liked else Res.string.like),
+            tint = if (liked) Color(0xFFFF2D55) else tint,
+            modifier = Modifier
+                .size(19.dp)
+                .graphicsLayer {
+                    scaleX = heartScale.value
+                    scaleY = heartScale.value
+                },
+        )
     }
 }
 

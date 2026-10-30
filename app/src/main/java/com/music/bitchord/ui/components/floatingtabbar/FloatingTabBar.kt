@@ -52,6 +52,8 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -220,7 +222,7 @@ fun FloatingTabBar(
 
     SharedTransitionLayout(modifier = modifier) {
         AnimatedContent(
-            targetState = scrollConnection.isInline,
+            targetState = scrollConnection.isInline && selectedTabKey != scope.standaloneTab?.key,
             transitionSpec = { fadeIn() togetherWith fadeOut() },
             contentAlignment = Alignment.BottomCenter
         ) { isInline ->
@@ -401,7 +403,8 @@ interface FloatingTabBarScope {
         key: Any,
         icon: @Composable () -> Unit,
         onClick: () -> Unit,
-        indication: (@Composable () -> Indication)? = { LocalIndication.current }
+        indication: (@Composable () -> Indication)? = { LocalIndication.current },
+        expandedContent: (@Composable () -> Unit)? = null,
     )
 }
 
@@ -650,19 +653,23 @@ private fun SharedTransitionScope.ExpandedBar(
             )
         }
 
+        val isStandaloneExpanded = standaloneTab != null &&
+            standaloneTab.expandedContent != null &&
+            selectedTabKey == standaloneTab.key
+
         // Full width, and the tab pill takes whatever the standalone tab leaves,
         // so the expanded bar measures the same as the app's plain nav bar
         // instead of shrinking to a narrow centred cluster. It also removes the
         // overflow this row used to be able to hit: the pill is now given a
         // width to divide rather than growing past the screen to fit its labels.
         Row(
-            horizontalArrangement = Arrangement.spacedBy(sizes.componentSpacing),
+            horizontalArrangement = Arrangement.spacedBy(if (isStandaloneExpanded) 0.dp else sizes.componentSpacing),
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(IntrinsicSize.Max)
         ) {
-            if (hasTabGroup) {
+            if (!isStandaloneExpanded && hasTabGroup) {
                 ExpandedTabs(
                     scope = scope,
                     selectedTabKey = selectedTabKey,
@@ -679,14 +686,21 @@ private fun SharedTransitionScope.ExpandedBar(
             if (standaloneTab != null) {
                 ExpandedStandaloneTab(
                     standaloneTab = standaloneTab,
+                    isExpanded = isStandaloneExpanded,
                     shapes = shapes,
                     colors = colors,
                     elevations = elevations,
                     animatedVisibilityScope = animatedVisibilityScope,
                     tabBarContentModifier = tabBarContentModifier,
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .aspectRatio(1f)
+                    modifier = if (isStandaloneExpanded) {
+                        Modifier
+                            .fillMaxWidth()
+                            .height(61.dp)
+                    } else {
+                        Modifier
+                            .fillMaxHeight()
+                            .aspectRatio(1f)
+                    }
                 )
             }
         }
@@ -987,6 +1001,7 @@ private fun SharedTransitionScope.ExpandedTabs(
 @Composable
 private fun SharedTransitionScope.ExpandedStandaloneTab(
     standaloneTab: FloatingTabBarTab,
+    isExpanded: Boolean,
     shapes: FloatingTabBarShapes,
     colors: FloatingTabBarColors,
     elevations: FloatingTabBarElevations,
@@ -994,12 +1009,9 @@ private fun SharedTransitionScope.ExpandedStandaloneTab(
     modifier: Modifier,
     tabBarContentModifier: @Composable () -> Modifier
 ) {
-    Tab(
-        icon = standaloneTab.icon,
-        title = standaloneTab.title,
-        isInline = false,
-        isStandalone = true,
+    Box(
         modifier = modifier
+            .animateContentSize(animationSpec = spring(stiffness = Spring.StiffnessMediumLow))
             .sharedElement(
                 sharedContentState = rememberSharedContentState("standaloneTab"),
                 animatedVisibilityScope = animatedVisibilityScope,
@@ -1015,12 +1027,28 @@ private fun SharedTransitionScope.ExpandedStandaloneTab(
             )
             .clip(shapes.standaloneTabShape)
             .then(tabBarContentModifier())
-            .clickable(
-                onClick = standaloneTab.onClick,
-                indication = standaloneTab.indication?.invoke(),
-                interactionSource = remember { MutableInteractionSource() }
+            .then(
+                if (!isExpanded) {
+                    Modifier.clickable(
+                        onClick = standaloneTab.onClick,
+                        indication = standaloneTab.indication?.invoke(),
+                        interactionSource = remember { MutableInteractionSource() }
+                    )
+                } else Modifier
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        if (isExpanded && standaloneTab.expandedContent != null) {
+            standaloneTab.expandedContent.invoke()
+        } else {
+            Tab(
+                icon = standaloneTab.icon,
+                title = standaloneTab.title,
+                isInline = false,
+                isStandalone = true,
             )
-    )
+        }
+    }
 }
 
 @Composable
@@ -1179,14 +1207,16 @@ private class FloatingTabBarScopeImpl : FloatingTabBarScope {
         key: Any,
         icon: @Composable () -> Unit,
         onClick: () -> Unit,
-        indication: (@Composable () -> Indication)?
+        indication: (@Composable () -> Indication)?,
+        expandedContent: (@Composable () -> Unit)?,
     ) {
         standaloneTab = FloatingTabBarTab(
             key = key,
             title = {},
             icon = icon,
             onClick = onClick,
-            indication = indication
+            indication = indication,
+            expandedContent = expandedContent,
         )
     }
 }
@@ -1196,7 +1226,8 @@ private data class FloatingTabBarTab(
     val title: @Composable () -> Unit,
     val icon: @Composable () -> Unit,
     val onClick: () -> Unit,
-    val indication: (@Composable () -> Indication)?
+    val indication: (@Composable () -> Indication)?,
+    val expandedContent: (@Composable () -> Unit)? = null,
 )
 
 /**

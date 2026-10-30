@@ -43,10 +43,10 @@ buildscript {
  */
 extra["bitchordVersionCode"] = (providers.gradleProperty("mumixic.versionCode").orNull?.toIntOrNull()
     ?: providers.gradleProperty("bitchord.versionCode").orNull?.toIntOrNull()
-    ?: 28)
+    ?: 29)
 extra["bitchordVersionName"] = (providers.gradleProperty("mumixic.version").orNull
     ?: providers.gradleProperty("bitchord.version").orNull
-    ?: "1.8.0")
+    ?: "1.8.1")
 
 /*
  * Bump this by hand before cutting each sideloaded test build ("beta2",

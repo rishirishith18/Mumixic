@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to stamp into the packages (without leading v, e.g. 1.8.0)"
+        description: "Version to stamp into the packages (without leading v, e.g. 1.8.1)"
         required: false
-        default: "1.8.0"
+        default: "1.8.1"
 
 permissions:
   contents: write
@@ -40,7 +40,7 @@ jobs:
         run: |
           version="${{ inputs.version }}"
           [ -n "$version" ] || version="${GITHUB_REF_NAME#v}"
-          [ -n "$version" ] || version="1.8.0"
+          [ -n "$version" ] || version="1.8.1"
           echo "value=$version" >> "$GITHUB_OUTPUT"
           echo "Building Android version: $version"
 
@@ -107,7 +107,25 @@ jobs:
             fi
           fi
 
-          # 4. Wear OS APK
+          # 4. TV APKs
+          tv_universal_apk=$(ls tv/build/outputs/apk/prod/release/*universal*.apk 2>/dev/null | head -n 1)
+          if [ -f "$tv_universal_apk" ]; then
+            cp "$tv_universal_apk" "dist/MumixicTV-$v.apk"
+          fi
+          for abi in arm64-v8a armeabi-v7a x86_64; do
+            tv_abi_apk=$(ls tv/build/outputs/apk/prod/release/*"$abi"*.apk 2>/dev/null | head -n 1)
+            if [ -f "$tv_abi_apk" ]; then
+              cp "$tv_abi_apk" "dist/MumixicTV-${v}_${abi}.apk"
+            fi
+          done
+          if [ ! -f "dist/MumixicTV-$v.apk" ]; then
+            single_tv=$(ls tv/build/outputs/apk/prod/release/*.apk 2>/dev/null | head -n 1)
+            if [ -f "$single_tv" ]; then
+              cp "$single_tv" "dist/MumixicTV-$v.apk"
+            fi
+          fi
+
+          # 5. Wear OS APK
           wear_apk=$(ls wearos/build/outputs/apk/prod/release/*.apk 2>/dev/null | head -n 1)
           if [ -f "$wear_apk" ]; then
             cp "$wear_apk" "dist/Mumixic-WearOS-$v.apk"

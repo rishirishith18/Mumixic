@@ -2852,6 +2852,10 @@ fun NowPlayingScreen(
                                     scaleX = scale
                                     scaleY = scale
                                     translationX = swipeSettle.value * (1f - p()) * (1f - share) * t
+                                    val tiltFraction = (swipeSettle.value / swipeThreshold).coerceIn(-1.5f, 1.5f)
+                                    rotationY = -tiltFraction * 14f * (1f - p()) * t
+                                    rotationZ = -tiltFraction * 2.5f * (1f - p()) * t
+                                    cameraDistance = 16f * density.density
                                 }
                                 // Haze must observe the drawable layer itself, the
                                 // banner included — a source on the surrounding layout
@@ -2956,6 +2960,10 @@ fun NowPlayingScreen(
                                         scaleX = scale
                                         scaleY = scale
                                         translationX = swipeSettle.value * (1f - p()) * share * t
+                                        val tiltFraction = (swipeSettle.value / swipeThreshold).coerceIn(-1.5f, 1.5f)
+                                        rotationY = -tiltFraction * 14f * (1f - p()) * t
+                                        rotationZ = -tiltFraction * 2.5f * (1f - p()) * t
+                                        cameraDistance = 16f * density.density
                                         // Its own corners only once it is smaller than
                                         // the sleeve; as the whole card it takes the
                                         // sleeve's clip, as it always did.
@@ -3253,6 +3261,28 @@ fun NowPlayingScreen(
                                             startDelayMillis = if (titleOverflowing) MARQUEE_ARTIST_STAGGER_MS else 0L,
                                             onOpenArtist = onOpenArtist,
                                         )
+                                        val qualityText = remember(song.sourceHiRes, song.sourceQuality, song.localUri, song.downloadFormat) {
+                                            when {
+                                                song.sourceHiRes -> "Hi-Res Lossless"
+                                                song.sourceQuality == "LOSSLESS" -> "Lossless"
+                                                song.sourceQuality == "HIGH" -> "High Quality · 320 kbps"
+                                                song.downloadFormat != null -> song.downloadFormat
+                                                song.localUri != null -> "Lossless · Local Audio"
+                                                else -> "Lossless"
+                                            }
+                                        }
+                                        if (qualityText != null) {
+                                            Spacer(Modifier.height(3.dp))
+                                            Text(
+                                                text = qualityText,
+                                                style = MaterialTheme.typography.labelSmall.copy(
+                                                    fontWeight = FontWeight.Medium,
+                                                    letterSpacing = 0.5.sp,
+                                                ),
+                                                color = LocalPlayerTint.current.copy(alpha = 0.50f),
+                                                maxLines = 1,
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -3265,14 +3295,9 @@ fun NowPlayingScreen(
                             // no YouTube identity to rate.
                             if (signedIn && song.localUri == null) {
                                 val liked = likeStatus == LikeStatus.LIKE
-                                CircleGlyph(
-                                    icon = if (liked) BitChordIcons.HeartFilled else BitChordIcons.Heart,
-                                    contentDescription = stringResource(
-                                        if (liked) Res.string.remove_from_liked else Res.string.like,
-                                    ),
-                                    onClick = onToggleLike,
-                                    active = liked,
-                                    haptic = if (liked) Haptic.ToggleOff else Haptic.ToggleOn,
+                                FavoriteHeartButton(
+                                    liked = liked,
+                                    onToggleLike = onToggleLike,
                                 )
                                 Spacer(Modifier.width(8.dp))
                             }

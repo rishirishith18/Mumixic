@@ -115,26 +115,6 @@ jobs:
             find_and_copy "app/build/outputs/apk/prod/release" "*.apk" "Mumixic-$v.apk"
           fi
 
-          # 3. TV universal APK
-          find_and_copy "tv/build/outputs/apk/prod/release" "*universal*.apk" "MumixicTV-v$v.apk"
-          find_and_copy "tv/build/outputs/apk/prod/release" "*universal*.apk" "MumixicTV-$v.apk"
-
-          # 4. TV ABI split APKs
-          for abi in arm64-v8a armeabi-v7a x86_64; do
-            find_and_copy "tv/build/outputs/apk/prod/release" "*$abi*.apk" "MumixicTV-v${v}_${abi}.apk"
-            find_and_copy "tv/build/outputs/apk/prod/release" "*$abi*.apk" "MumixicTV-${v}_${abi}.apk"
-          done
-
-          # Fallback if no TV universal was matched
-          if [ ! -f "dist/MumixicTV-v$v.apk" ]; then
-            find_and_copy "tv/build/outputs/apk/prod/release" "*.apk" "MumixicTV-v$v.apk"
-            find_and_copy "tv/build/outputs/apk/prod/release" "*.apk" "MumixicTV-$v.apk"
-          fi
-
-          # 5. Wear OS APK (if available)
-          find_and_copy "wearos/build/outputs/apk/prod/release" "*.apk" "Mumixic-WearOS-v$v.apk"
-          find_and_copy "wearos/build/outputs/apk/prod/release" "*.apk" "Mumixic-WearOS-$v.apk"
-
           echo "Collected APKs for OTA release:"
           ls -lh dist/
 
@@ -173,9 +153,5 @@ jobs:
 
             ### 🎵 Audio Quality Typography
             - Replaced bulky pill badges with a clean, unobtrusive typographic indicator directly below artist credits (`Hi-Res Lossless`, `Lossless`, `High Quality · 320 kbps`).
-
-            ### 📺 TV & Platform Optimizations
-            - Synchronized versioning across phone (`1.8.1`), TV (`1.8.1`), and CI builds.
-            - Automated TV APK artifact packaging (`MumixicTV-1.8.1.apk` and ABI splits) for seamless in-app OTA updates.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

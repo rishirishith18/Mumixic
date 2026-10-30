@@ -19,4 +19,3 @@ rootProject.name = "Mumixic"
 include(":shared")
 include(":sharedUi")
 include(":app")
-include(":tv")
